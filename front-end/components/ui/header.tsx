@@ -1,8 +1,19 @@
+'use client';
 import { Heart, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { verifyToken } from '../../services/authService';
 import { Button } from './button';
 
 export default function Header() {
+  const [isAuth, setIsAuth] = useState(false);
+  useEffect(() => {
+    const verify = async () => {
+      const result = await verifyToken();
+      setIsAuth(result.success);
+    };
+    verify();
+  }, []);
   return (
     <header className='sticky top-0 z-50 w-full border-b bg-background'>
       <div className='container mx-auto flex h-16 items-center justify-between'>
@@ -44,9 +55,9 @@ export default function Header() {
               </span>
             </Button>
           </Link>
-          <Link href='/login'>
+          <Link href={isAuth ? '/account' : '/login'}>
             <Button variant='outline' size='sm'>
-              Đăng nhập
+              {isAuth ? 'Tài khoản' : 'Đăng nhập'}
             </Button>
           </Link>
         </div>

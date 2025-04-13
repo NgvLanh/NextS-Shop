@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
-import axios from 'axios';
 import {
   Clock,
   CreditCard,
@@ -16,24 +15,15 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import Footer from '../../components/ui/footer';
 import Header from '../../components/ui/header';
-import { supabase } from '../../lib/supabase';
 
 export default async function AccountPage() {
   const router = useRouter();
 
-  useEffect(() => {
-    const session = async () => {
-      const { data } = await axios.post('/api/auth/verify');
-      console.log(data);
-    };
-    session();
-  }, []);
-
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
     router.push('/');
   };
 

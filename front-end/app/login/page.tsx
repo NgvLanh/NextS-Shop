@@ -6,14 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import Footer from '../../components/ui/footer';
 import { toast } from '../../hooks/use-toast';
+import { ApiRequest, ApiResponse } from '../../services/apiRequest';
 
 const loginSchema = z.object({
   email: z.string().email('Vui lòng nhập email hợp lệ'),
@@ -25,6 +26,12 @@ const registerSchema = z
   .object({
     fullName: z.string().min(1, 'Họ tên không được để trống'),
     email: z.string().email('Email không hợp lệ'),
+    phone: z
+      .string()
+      .regex(
+        /^0[3|5|7|8][0-9]{8}$/,
+        'Số điện thoại phải bắt đầu bằng 03 05 07 08 và có 10 chữ số'
+      ),
     password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
     confirmPassword: z.string(),
     agreedToTerms: z
@@ -41,6 +48,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const {
     register: loginRegister,
     handleSubmit: handleLoginSubmit,
@@ -58,18 +66,35 @@ export default function LoginPage() {
   } = useForm({ resolver: zodResolver(registerSchema) });
 
   const handleLogin = async (data: LoginFormData) => {
-    console.log(data);
+    const { rememberMe, ...rest } = data;
     try {
       setIsLoading(true);
-      await axios.post('/api/auth/login', data);
-      toast({
-        title: 'Thành công',
-        description: 'Đăng nhập thành công!',
-      });
+      const result = await ApiRequest<ApiResponse>(
+        '/auth/sign-in',
+        'POST',
+        rest
+      );
+      if (result.success) {
+        toast({
+          title: 'Thành công',
+          description: 'Đăng nhập thành công!',
+        });
+        if (rememberMe) {
+          localStorage.setItem('token', result.data?.accessToken || '');
+        } else {
+          sessionStorage.setItem('token', result.data?.accessToken || '');
+        }
+        const role = result.data?.user?.role;
+        if (role.name.toUpperCase() === 'ADMIN') {
+          router.push('/admin');
+        } else {
+          router.push('/');
+        }
+      }
     } catch (err: any) {
       toast({
         title: 'Thất bại',
-        description: err.response?.data?.error || 'Có lỗi xảy ra!',
+        description: err?.message || 'Có lỗi xảy ra!',
         variant: 'destructive',
       });
     } finally {
@@ -78,18 +103,24 @@ export default function LoginPage() {
   };
 
   const handleRegister = async (data: RegisterFormData) => {
-    console.log(data);
+    const { confirmPassword, agreedToTerms, ...rest } = data;
     try {
       setIsLoading(true);
-      await axios.post('/api/auth/register', data);
-      toast({
-        title: 'Thành công',
-        description: 'Đăng ký thành công vui lòng vào email xác nhận!',
-      });
+      const result = await ApiRequest<ApiResponse>(
+        '/auth/sign-up',
+        'POST',
+        rest
+      );
+      if (result.success) {
+        toast({
+          title: 'Thành công',
+          description: 'Đăng ký thành công vui lòng vào email xác nhận!',
+        });
+      }
     } catch (err: any) {
       toast({
         title: 'Thất bại',
-        description: err.response?.data?.error || 'Có lỗi xảy ra!',
+        description: err?.message || 'Có lỗi xảy ra!',
         variant: 'destructive',
       });
     } finally {
@@ -249,12 +280,26 @@ export default function LoginPage() {
                   <Input
                     id='email-register'
                     type='email'
-                    placeholder='your.email@example.com'
+                    placeholder='email@example.com'
                     {...registerRegister('email')}
                   />
                   {registerErrors.email && (
                     <small className='text-red-500'>
                       {registerErrors.email.message as string}
+                    </small>
+                  )}
+                </div>
+                <div className='space-y-2'>
+                  <Label htmlFor='phone-register'>Số điện thoại</Label>
+                  <Input
+                    id='phone-register'
+                    type='text'
+                    placeholder='039 xxx xxxx'
+                    {...registerRegister('phone')}
+                  />
+                  {registerErrors.phone && (
+                    <small className='text-red-500'>
+                      {registerErrors.phone.message as string}
                     </small>
                   )}
                 </div>
