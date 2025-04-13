@@ -7,14 +7,21 @@
 CREATE TYPE order_status AS ENUM ('pending', 'paid', 'shipped', 'delivered', 'cancelled');
 CREATE TYPE payment_status AS ENUM ('pending', 'paid', 'failed');
 
+-- ROLES
+CREATE TABLE roles (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(10) UNIQUE NOT NULL,
+);
 -- USERS
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
+    role_id BIGINT REFERENCES roles(id)
     email VARCHAR(255) UNIQUE NOT NULL,
     encrypted_password VARCHAR(255) NOT NULL,
     full_name VARCHAR(100),
     phone VARCHAR(20),
     is_active BOOLEAN DEFAULT true,
+    avatar_url VARCHAR(255),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

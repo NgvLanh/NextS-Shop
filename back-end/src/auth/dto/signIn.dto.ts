@@ -7,4 +7,6 @@ export class SignInDto {
   @IsNotEmpty({ message: 'Mật khẩu không được để trống' })
   @Length(6, 255, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
   password: string;
+
+  rememberMe: boolean;
 }

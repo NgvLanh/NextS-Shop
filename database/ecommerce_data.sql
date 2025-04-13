@@ -1,15 +1,20 @@
+-- ROLES
+INSERT INTO roles (name) VALUES
+('admin'),
+('client'),
+
 -- USERS
-INSERT INTO users (email, encrypted_password, full_name, phone) VALUES
-('user1@example.com', 'hashedpwd1', 'Alice Nguyễn', '0901234567'),
-('user2@example.com', 'hashedpwd2', 'Bob Trần', '0912345678'),
-('user3@example.com', 'hashedpwd3', 'Charlie Phạm', '0923456789'),
-('user4@example.com', 'hashedpwd4', 'David Lê', '0934567890'),
-('user5@example.com', 'hashedpwd5', 'Emma Hồ', '0945678901'),
-('user6@example.com', 'hashedpwd6', 'Fiona Vũ', '0956789012'),
-('user7@example.com', 'hashedpwd7', 'George Đặng', '0967890123'),
-('user8@example.com', 'hashedpwd8', 'Hannah Bùi', '0978901234'),
-('user9@example.com', 'hashedpwd9', 'Ian Trịnh', '0989012345'),
-('user10@example.com', 'hashedpwd10', 'Jane Dương', '0990123456');
+INSERT INTO users (email, encrypted_password, full_name, phone, avatar_url, role_id) VALUES
+('user1@example.com', 'hashedpwd1', 'Alice Nguyễn', '0901234567', NULL, 1),
+('user2@example.com', 'hashedpwd2', 'Bob Trần', '0912345678', NULL, 2),
+('user3@example.com', 'hashedpwd3', 'Charlie Phạm', '0923456789', NULL, 2),
+('user4@example.com', 'hashedpwd4', 'David Lê', '0934567890', NULL, 2),
+('user5@example.com', 'hashedpwd5', 'Emma Hồ', '0945678901', NULL, 2),
+('user6@example.com', 'hashedpwd6', 'Fiona Vũ', '0956789012', NULL, 2),
+('user7@example.com', 'hashedpwd7', 'George Đặng', '0967890123', NULL, 2),
+('user8@example.com', 'hashedpwd8', 'Hannah Bùi', '0978901234', NULL, 2),
+('user9@example.com', 'hashedpwd9', 'Ian Trịnh', '0989012345', NULL, 2),
+('user10@example.com', 'hashedpwd10', 'Jane Dương', '0990123456', NULL, 2);
 
 -- USER ADDRESSES
 INSERT INTO user_addresses (user_id, recipient, phone, address) VALUES

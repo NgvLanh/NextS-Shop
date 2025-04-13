@@ -1,5 +1,5 @@
 export class ApiResponse {
-  static success(data: any, message: string) {
+  static success(message: string, data?: any) {
     return {
       success: true,
       message,
@@ -7,11 +7,10 @@ export class ApiResponse {
     };
   }
 
-  static error(message: string, error?: any) {
+  static error(message: string) {
     return {
       success: false,
       message,
-      error,
     };
   }
 
@@ -22,10 +21,10 @@ export class ApiResponse {
     };
   }
 
-  static validationError(errors: any) {
+  static validationError(message: any) {
     return {
       success: false,
-      errors,
+      message,
     };
   }
 }
