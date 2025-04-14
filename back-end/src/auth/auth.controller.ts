@@ -3,12 +3,16 @@ import {
   Controller,
   Get,
   HttpCode,
+  Param,
   Post,
+  Put,
   Query,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/signIn.dto';
@@ -42,7 +46,18 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('verify-token')
   @HttpCode(200)
-  async verifyToken() {
-    return await this.authService.verifyToken();
+  async verifyToken(@Req() req: Request) {
+    return await this.authService.verifyToken(req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('profile/:id')
+  @HttpCode(200)
+  async updateProfile(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @Req() req: Request,
+  ) {
+    return await this.authService.updateProfile(+id, updateUserDto, req);
   }
 }

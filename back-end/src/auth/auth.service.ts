@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApiResponse } from '../../configs/api-response';
 import { MailService } from '../mail/mail.service';
+import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { User } from '../users/entities/user.entity';
 import { SignInDto } from './dto/signIn.dto';
 import { SignUpDto } from './dto/signUp.dto';
@@ -95,8 +96,37 @@ export class AuthService {
     }
   }
 
-  async verifyToken() {
+  async verifyToken(req) {
     this.logger.log('Xác minh token người dùng thành công');
-    return ApiResponse.success('Xác minh token người dùng thành công');
+    const id = req.user?.sub;
+    const user = await this.userRepository.findOneBy({ id });
+    const { password, verifyEmail, isActive, ...result } = user;
+    return ApiResponse.success('Xác minh token người dùng thành công', result);
+  }
+
+  async updateProfile(id: number, updateUserDto: UpdateUserDto, req) {
+    if (id !== req.user?.sub) {
+      throw new HttpException(
+        ApiResponse.error('Truy cập không được phép!'),
+        401,
+      );
+    }
+
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new HttpException(
+        ApiResponse.notFound('Không tìm thấy người dùng'),
+        404,
+      );
+    }
+
+    Object.assign(user, {
+      ...updateUserDto,
+      updatedAt: new Date(),
+    });
+
+    const updatedUser = await this.userRepository.save(user);
+    this.logger.log(`Cập nhật hồ sơ thành công user: ${req.user?.email}`);
+    return ApiResponse.success('Cập nhật hồ sơ thành công!', updatedUser);
   }
 }

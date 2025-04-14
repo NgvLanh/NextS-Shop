@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Clock,
   CreditCard,
@@ -15,13 +16,93 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { FieldValues, useForm } from 'react-hook-form';
+import { z } from 'zod';
 import Footer from '../../components/ui/footer';
 import Header from '../../components/ui/header';
+import { UserType } from '../../lib/types';
+import { ApiRequest, ApiResponse } from '../../services/apiRequest';
+import { verifyToken } from '../../services/authService';
 
-export default async function AccountPage() {
+const profileSchema = z.object({
+  fullName: z.string().min(1, 'Họ tên không được để trống'),
+  phone: z
+    .string()
+    .regex(
+      /^0[3|5|7|8][0-9]{8}$/,
+      'Số điện thoại phải bắt đầu bằng 03 05 07 08 và có 10 chữ số'
+    ),
+});
+
+const changePasswordSchema = z
+  .object({
+    currentPassword: z
+      .string()
+      .min(6, 'Mật khẩu hiện tại phải có ít nhất 6 ký tự'),
+    newPassword: z.string().min(6, 'Mật khẩu mới phải có ít nhất 6 ký tự'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Xác nhận mật khẩu không khớp',
+    path: ['confirmPassword'],
+  });
+
+type ChangePasswordData = z.infer<typeof changePasswordSchema>;
+type profileData = z.infer<typeof profileSchema>;
+
+export default function AccountPage() {
+  const {
+    register: updateProfileRegister,
+    handleSubmit: handleupdateProfileSubmit,
+    formState: { errors: updateProfileErrors },
+  } = useForm({ resolver: zodResolver(profileSchema) });
+
+  const {
+    register: changePasswordRegister,
+    handleSubmit: handlechangePasswordSubmit,
+    formState: { errors: changePasswordErrors },
+  } = useForm({
+    resolver: zodResolver(changePasswordSchema),
+  });
+
   const router = useRouter();
+  const [profile, setProfile] = useState<UserType | null>(null);
 
-  const handleLogout = async () => {
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const result = await verifyToken();
+      setProfile(result.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleupdateProfile = async (
+    id: number,
+    data: profileData | null | FieldValues
+  ) => {
+    try {
+      const result = await ApiRequest<ApiResponse>(
+        `auth/profile/${id}`,
+        'PUT',
+        data
+      );
+      setProfile(result.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleChangePassword = (data: ChangePasswordData) => {
+    console.log(data);
+  };
+
+  const handleLogout = () => {
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
     router.push('/');
@@ -73,18 +154,20 @@ export default async function AccountPage() {
       <Header />
       <main className='flex-1'>
         <div className='container mx-auto py-8'>
-          <h1 className='text-3xl font-bold mb-8'>My Account</h1>
+          <h1 className='text-3xl font-bold mb-8'>Thông tin tài khoản</h1>
 
           <div className='grid md:grid-cols-4 gap-8'>
             <div className='md:col-span-1'>
               <div className='border rounded-lg overflow-hidden'>
                 <div className='bg-muted p-6 flex flex-col items-center'>
                   <div className='w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4'>
-                    <User className='h-10 w-10 text-primary' />
+                    {!profile && <User className='h-10 w-10 text-primary' />}
                   </div>
-                  <h2 className='font-bold text-lg'>John Doe</h2>
+                  <h2 className='font-bold text-lg'>
+                    {profile && profile.fullName}
+                  </h2>
                   <p className='text-sm text-muted-foreground'>
-                    john.doe@example.com
+                    {profile && profile.email}
                   </p>
                 </div>
                 <div className='p-4'>
@@ -94,35 +177,35 @@ export default async function AccountPage() {
                       className='flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium bg-muted'
                     >
                       <User className='h-4 w-4' />
-                      Profile
+                      Thông tin
                     </Link>
                     <Link
                       href='/account/orders'
                       className='flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium hover:bg-muted'
                     >
                       <Package className='h-4 w-4' />
-                      Orders
+                      Đặt hàng
                     </Link>
                     <Link
                       href='/account/wishlist'
                       className='flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium hover:bg-muted'
                     >
                       <Heart className='h-4 w-4' />
-                      Wishlist
+                      Yêu thích
                     </Link>
                     <Link
                       href='/account/addresses'
                       className='flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium hover:bg-muted'
                     >
                       <MapPin className='h-4 w-4' />
-                      Addresses
+                      Địa chỉ
                     </Link>
                     <Link
                       href='/account/payment'
                       className='flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium hover:bg-muted'
                     >
                       <CreditCard className='h-4 w-4' />
-                      Payment Methods
+                      Phương thức thanh toán
                     </Link>
                   </nav>
                 </div>
@@ -133,7 +216,7 @@ export default async function AccountPage() {
                     onClick={handleLogout}
                   >
                     <LogOut className='h-4 w-4 mr-2' />
-                    Logout
+                    Đăng xuất
                   </Button>
                 </div>
               </div>
@@ -142,75 +225,127 @@ export default async function AccountPage() {
             <div className='md:col-span-3'>
               <Tabs defaultValue='profile'>
                 <TabsContent value='profile' className='space-y-6'>
-                  <div className='border rounded-lg p-6'>
-                    <h2 className='text-xl font-bold mb-6'>
-                      Profile Information
-                    </h2>
+                  <form
+                    onSubmit={handleupdateProfileSubmit(
+                      (data) =>
+                        handleupdateProfile(profile?.id ?? 0, data) as any
+                    )}
+                    className='border rounded-lg p-6'
+                  >
+                    <h2 className='text-xl font-bold mb-6'>Thông Tin Hồ Sơ</h2>
 
                     <div className='space-y-4'>
-                      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                        <div className='space-y-2'>
-                          <Label htmlFor='first-name'>First Name</Label>
-                          <Input id='first-name' defaultValue='John' />
-                        </div>
-                        <div className='space-y-2'>
-                          <Label htmlFor='last-name'>Last Name</Label>
-                          <Input id='last-name' defaultValue='Doe' />
-                        </div>
+                      <div className='space-y-2'>
+                        <Label htmlFor='full-name'>Họ tên</Label>
+                        <Input
+                          {...updateProfileRegister('fullName')}
+                          defaultValue={profile?.fullName}
+                        />
+                        {updateProfileErrors.fullName && (
+                          <small className='text-red-500'>
+                            {updateProfileErrors.fullName.message as string}
+                          </small>
+                        )}
                       </div>
 
                       <div className='space-y-2'>
                         <Label htmlFor='email'>Email</Label>
+
                         <Input
                           id='email'
                           type='email'
-                          defaultValue='john.doe@example.com'
+                          defaultValue={profile?.email}
+                          readOnly
+                          disabled
                         />
                       </div>
 
                       <div className='space-y-2'>
-                        <Label htmlFor='phone'>Phone</Label>
+                        <Label htmlFor='phone'>Số Điện Thoại</Label>
                         <Input
-                          id='phone'
+                          {...updateProfileRegister('phone')}
                           type='tel'
-                          defaultValue='+1 (555) 123-4567'
+                          defaultValue={profile?.phone}
                         />
+                        {updateProfileErrors.phone && (
+                          <small className='text-red-500'>
+                            {updateProfileErrors.phone.message as string}
+                          </small>
+                        )}
                       </div>
 
                       <div className='pt-4'>
-                        <Button>Save Changes</Button>
+                        <Button type='submit'>Lưu Thay Đổi</Button>
                       </div>
                     </div>
-                  </div>
+                  </form>
 
-                  <div className='border rounded-lg p-6'>
-                    <h2 className='text-xl font-bold mb-6'>Change Password</h2>
+                  <form
+                    onSubmit={handlechangePasswordSubmit(
+                      handleChangePassword as any
+                    )}
+                    className='border rounded-lg p-6'
+                  >
+                    <h2 className='text-xl font-bold mb-6'>Đổi Mật Khẩu</h2>
 
                     <div className='space-y-4'>
                       <div className='space-y-2'>
                         <Label htmlFor='current-password'>
-                          Current Password
+                          Mật Khẩu Hiện Tại
                         </Label>
-                        <Input id='current-password' type='password' />
+                        <Input
+                          id='current-password'
+                          type='password'
+                          {...changePasswordRegister('currentPassword')}
+                        />
+                        {changePasswordErrors.currentPassword && (
+                          <small className='text-red-500'>
+                            {
+                              changePasswordErrors.currentPassword
+                                .message as string
+                            }
+                          </small>
+                        )}
                       </div>
 
                       <div className='space-y-2'>
-                        <Label htmlFor='new-password'>New Password</Label>
-                        <Input id='new-password' type='password' />
+                        <Label htmlFor='new-password'>Mật Khẩu Mới</Label>
+                        <Input
+                          id='new-password'
+                          type='password'
+                          {...changePasswordRegister('newPassword')}
+                        />
+                        {changePasswordErrors.newPassword && (
+                          <small className='text-red-500'>
+                            {changePasswordErrors.newPassword.message as string}
+                          </small>
+                        )}
                       </div>
 
                       <div className='space-y-2'>
                         <Label htmlFor='confirm-password'>
-                          Confirm New Password
+                          Xác Nhận Mật Khẩu Mới
                         </Label>
-                        <Input id='confirm-password' type='password' />
+                        <Input
+                          id='confirm-password'
+                          type='password'
+                          {...changePasswordRegister('confirmPassword')}
+                        />
+                        {changePasswordErrors.confirmPassword && (
+                          <small className='text-red-500'>
+                            {
+                              changePasswordErrors.confirmPassword
+                                .message as string
+                            }
+                          </small>
+                        )}
                       </div>
 
                       <div className='pt-4'>
-                        <Button>Update Password</Button>
+                        <Button type='submit'>Cập Nhật Mật Khẩu</Button>
                       </div>
                     </div>
-                  </div>
+                  </form>
                 </TabsContent>
 
                 <TabsContent value='orders' className='space-y-6'>
