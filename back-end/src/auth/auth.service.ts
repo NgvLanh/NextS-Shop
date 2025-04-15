@@ -39,9 +39,9 @@ export class AuthService {
     this.logger.log(`Đăng nhập thành công: ${email}`);
     const { password: _, isActive, ...userData } = user;
     const payload = { sub: user.id, email: user.email };
-
+    const token = this.jwtService.sign(payload);
     return ApiResponse.success('Đăng nhập thành công', {
-      accessToken: this.jwtService.sign(payload),
+      accessToken: token,
       user: userData,
     });
   }
