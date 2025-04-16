@@ -1,6 +1,7 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
 import { ApiResponse } from '../../configs/api-response';
 import { MailService } from '../mail/mail.service';
@@ -24,14 +25,19 @@ export class AuthService {
     const { email, password } = signInDto;
 
     const user = await this.userRepository.findOne({
-      where: { email, isActive: true, verifyEmail: true },
+      where: { email, isActive: true },
       relations: { role: true },
     });
-
-    if (!user || user.password !== password) {
+    if (user && !user.verifyEmail) {
+      throw new HttpException(
+        ApiResponse.error('Tài khoản chưa xác nhận email!'),
+        401,
+      );
+    }
+    if (!user || bcrypt.compareSync(password, user.password) === false) {
       this.logger.error(`Email hoặc mật khẩu không hợp lệ: ${email}`);
       throw new HttpException(
-        ApiResponse.error('Email hoặc mật khẩu không hợp lệ'),
+        ApiResponse.error('Email hoặc mật khẩu không hợp lệ!'),
         401,
       );
     }
@@ -40,7 +46,7 @@ export class AuthService {
     const { password: _, isActive, ...userData } = user;
     const payload = { sub: user.id, email: user.email };
     const token = this.jwtService.sign(payload);
-    return ApiResponse.success('Đăng nhập thành công', {
+    return ApiResponse.success('Đăng nhập thành công!', {
       accessToken: token,
       user: userData,
     });
@@ -55,6 +61,7 @@ export class AuthService {
       throw new HttpException(ApiResponse.error('Email đã tồn tại'), 400);
     }
 
+    signUpDto.password = await bcrypt.hash(signUpDto.password, 10);
     const newUser = this.userRepository.create(signUpDto);
     const savedUser = await this.userRepository.save(newUser);
 
