@@ -1,9 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Clock,
   CreditCard,
@@ -17,54 +14,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { FieldValues, useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { FieldValues } from 'react-hook-form';
+import AccountForm from '../../components/form/account';
+import ChangePasswordForm from '../../components/form/change-password';
 import Footer from '../../components/ui/footer';
 import Header from '../../components/ui/header';
+import useAuth from '../../hooks/use-auth';
+import { toast } from '../../hooks/use-toast';
 import { UserType } from '../../lib/types';
 import { ApiRequest, ApiResponse } from '../../services/apiRequest';
 import { verifyToken } from '../../services/authService';
 
-const profileSchema = z.object({
-  fullName: z.string().min(1, 'Họ tên không được để trống'),
-  phone: z
-    .string()
-    .regex(
-      /^0[3|5|7|8][0-9]{8}$/,
-      'Số điện thoại phải bắt đầu bằng 03 05 07 08 và có 10 chữ số'
-    ),
-});
-
-const changePasswordSchema = z
-  .object({
-    currentPassword: z
-      .string()
-      .min(6, 'Mật khẩu hiện tại phải có ít nhất 6 ký tự'),
-    newPassword: z.string().min(6, 'Mật khẩu mới phải có ít nhất 6 ký tự'),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: 'Xác nhận mật khẩu không khớp',
-    path: ['confirmPassword'],
-  });
-
-type ChangePasswordData = z.infer<typeof changePasswordSchema>;
-type profileData = z.infer<typeof profileSchema>;
-
 export default function AccountPage() {
-  const {
-    register: updateProfileRegister,
-    handleSubmit: handleupdateProfileSubmit,
-    formState: { errors: updateProfileErrors },
-  } = useForm({ resolver: zodResolver(profileSchema) });
-
-  const {
-    register: changePasswordRegister,
-    handleSubmit: handlechangePasswordSubmit,
-    formState: { errors: changePasswordErrors },
-  } = useForm({
-    resolver: zodResolver(changePasswordSchema),
-  });
+  useAuth();
 
   const router = useRouter();
   const [profile, setProfile] = useState<UserType | null>(null);
@@ -84,7 +46,7 @@ export default function AccountPage() {
 
   const handleupdateProfile = async (
     id: number,
-    data: profileData | null | FieldValues
+    data: UserType | null | FieldValues
   ) => {
     try {
       const result = await ApiRequest<ApiResponse>(
@@ -93,13 +55,18 @@ export default function AccountPage() {
         data
       );
       setProfile(result.data);
+      toast({
+        title: 'Thành công',
+        description: 'Cập nhật thông tin thành công!',
+      });
     } catch (error) {
+      toast({
+        title: 'Thất bại',
+        description: 'Cập nhật thông tin Thất bại!',
+        variant: 'destructive',
+      });
       console.log(error);
     }
-  };
-
-  const handleChangePassword = (data: ChangePasswordData) => {
-    console.log(data);
   };
 
   const handleLogout = () => {
@@ -225,127 +192,8 @@ export default function AccountPage() {
             <div className='md:col-span-3'>
               <Tabs defaultValue='profile'>
                 <TabsContent value='profile' className='space-y-6'>
-                  <form
-                    onSubmit={handleupdateProfileSubmit(
-                      (data) =>
-                        handleupdateProfile(profile?.id ?? 0, data) as any
-                    )}
-                    className='border rounded-lg p-6'
-                  >
-                    <h2 className='text-xl font-bold mb-6'>Thông Tin Hồ Sơ</h2>
-
-                    <div className='space-y-4'>
-                      <div className='space-y-2'>
-                        <Label htmlFor='full-name'>Họ tên</Label>
-                        <Input
-                          {...updateProfileRegister('fullName')}
-                          defaultValue={profile?.fullName}
-                        />
-                        {updateProfileErrors.fullName && (
-                          <small className='text-red-500'>
-                            {updateProfileErrors.fullName.message as string}
-                          </small>
-                        )}
-                      </div>
-
-                      <div className='space-y-2'>
-                        <Label htmlFor='email'>Email</Label>
-
-                        <Input
-                          id='email'
-                          type='email'
-                          defaultValue={profile?.email}
-                          readOnly
-                          disabled
-                        />
-                      </div>
-
-                      <div className='space-y-2'>
-                        <Label htmlFor='phone'>Số Điện Thoại</Label>
-                        <Input
-                          {...updateProfileRegister('phone')}
-                          type='tel'
-                          defaultValue={profile?.phone}
-                        />
-                        {updateProfileErrors.phone && (
-                          <small className='text-red-500'>
-                            {updateProfileErrors.phone.message as string}
-                          </small>
-                        )}
-                      </div>
-
-                      <div className='pt-4'>
-                        <Button type='submit'>Lưu Thay Đổi</Button>
-                      </div>
-                    </div>
-                  </form>
-
-                  <form
-                    onSubmit={handlechangePasswordSubmit(
-                      handleChangePassword as any
-                    )}
-                    className='border rounded-lg p-6'
-                  >
-                    <h2 className='text-xl font-bold mb-6'>Đổi Mật Khẩu</h2>
-
-                    <div className='space-y-4'>
-                      <div className='space-y-2'>
-                        <Label htmlFor='current-password'>
-                          Mật Khẩu Hiện Tại
-                        </Label>
-                        <Input
-                          id='current-password'
-                          type='password'
-                          {...changePasswordRegister('currentPassword')}
-                        />
-                        {changePasswordErrors.currentPassword && (
-                          <small className='text-red-500'>
-                            {
-                              changePasswordErrors.currentPassword
-                                .message as string
-                            }
-                          </small>
-                        )}
-                      </div>
-
-                      <div className='space-y-2'>
-                        <Label htmlFor='new-password'>Mật Khẩu Mới</Label>
-                        <Input
-                          id='new-password'
-                          type='password'
-                          {...changePasswordRegister('newPassword')}
-                        />
-                        {changePasswordErrors.newPassword && (
-                          <small className='text-red-500'>
-                            {changePasswordErrors.newPassword.message as string}
-                          </small>
-                        )}
-                      </div>
-
-                      <div className='space-y-2'>
-                        <Label htmlFor='confirm-password'>
-                          Xác Nhận Mật Khẩu Mới
-                        </Label>
-                        <Input
-                          id='confirm-password'
-                          type='password'
-                          {...changePasswordRegister('confirmPassword')}
-                        />
-                        {changePasswordErrors.confirmPassword && (
-                          <small className='text-red-500'>
-                            {
-                              changePasswordErrors.confirmPassword
-                                .message as string
-                            }
-                          </small>
-                        )}
-                      </div>
-
-                      <div className='pt-4'>
-                        <Button type='submit'>Cập Nhật Mật Khẩu</Button>
-                      </div>
-                    </div>
-                  </form>
+                  <AccountForm data={profile} onSubmit={handleupdateProfile} />
+                  <ChangePasswordForm />
                 </TabsContent>
 
                 <TabsContent value='orders' className='space-y-6'>
