@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Heart, ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import HeroSection from '../components/hero-section';
 import Footer from '../components/ui/footer';
 import Header from '../components/ui/header';
 
@@ -11,41 +12,7 @@ export default function Home() {
       <Header />
       <main className='flex-1'>
         {/* Hero Section */}
-        <section className='w-full py-12 md:py-24 lg:py-32 bg-muted'>
-          <div className='container mx-auto px-4 md:px-6'>
-            <div className='grid gap-6 lg:grid-cols-2 lg:gap-12 items-center'>
-              <div className='space-y-4'>
-                <h1 className='text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none'>
-                  Discover Our Latest Collection
-                </h1>
-                <p className='max-w-[600px] text-muted-foreground md:text-xl'>
-                  Shop the latest trends and discover our premium quality
-                  products at affordable prices.
-                </p>
-                <div className='flex flex-col gap-2 min-[400px]:flex-row'>
-                  <Link href='/products'>
-                    <Button size='lg'>Shop Now</Button>
-                  </Link>
-                  <Link href='/categories'>
-                    <Button size='lg' variant='outline'>
-                      Browse Categories
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-              <div className='mx-auto w-full max-w-[500px] aspect-video overflow-hidden rounded-xl'>
-                <Image
-                  src='/placeholder.svg?height=600&width=800'
-                  alt='Hero Image'
-                  width={800}
-                  height={600}
-                  className='object-cover w-full h-full'
-                  priority
-                />
-              </div>
-            </div>
-          </div>
-        </section>
+        <HeroSection />
 
         {/* Featured Products */}
         <section className='w-full py-12 md:py-24'>

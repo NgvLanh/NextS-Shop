@@ -6,6 +6,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { MailModule } from './mail/mail.module';
 import { RolesModule } from './roles/roles.module';
 import { UsersModule } from './users/users.module';
+import { BannersModule } from './banners/banners.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UsersModule } from './users/users.module';
     MailModule,
     RolesModule,
     CloudinaryModule,
+    BannersModule,
   ],
   controllers: [],
 })

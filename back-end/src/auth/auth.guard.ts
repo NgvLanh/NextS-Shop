@@ -21,7 +21,7 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException(ApiResponse.error('Token không hợp lệ!'));
+      throw new UnauthorizedException(ApiResponse.error('Bạn chưa đăng nhập!'));
     }
     try {
       const payload = await this.jwtService.verifyAsync(token, {
@@ -30,7 +30,9 @@ export class AuthGuard implements CanActivate {
       request['user'] = payload;
       Logger.log(`Xác thực thành công: ${payload.email}`);
     } catch {
-      throw new UnauthorizedException(ApiResponse.error('Sử lý token lỗi!'));
+      throw new UnauthorizedException(
+        ApiResponse.error('Phiên bản đã hết hạn!'),
+      );
     }
     return true;
   }

@@ -22,9 +22,13 @@ import { User } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { UserType } from '../../lib/types';
 import { imageToBase64 } from '../../lib/utils';
-import { ApiRequest, ApiResponse } from '../../services/apiRequest';
 
-export default function AvatarForm({ data }: { data: UserType | null }) {
+type AvatarFormProps = {
+  user: UserType | null;
+  onSubmit: (id: number, imageUrl: string) => void;
+};
+
+export default function AvatarForm({ user, onSubmit }: AvatarFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
 
@@ -32,18 +36,7 @@ export default function AvatarForm({ data }: { data: UserType | null }) {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
       const base64 = await imageToBase64(file);
-      try {
-        const result = await ApiRequest<ApiResponse>(
-          `auth/avatar/${data?.id}`,
-          'PUT',
-          {
-            avatar: base64,
-          }
-        );
-        console.log(result);
-      } catch (error) {
-        console.log(error);
-      }
+      onSubmit(user!.id, base64);
     }
   };
 
@@ -52,7 +45,7 @@ export default function AvatarForm({ data }: { data: UserType | null }) {
   };
 
   const handleDeleteAvatar = () => {
-    console.log('Đã xoá ảnh');
+    onSubmit(user!.id, '');
     setOpen(false);
   };
 
@@ -60,8 +53,8 @@ export default function AvatarForm({ data }: { data: UserType | null }) {
     <div className='relative w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center mb-4 overflow-hidden select-none'>
       <DropdownMenu>
         <DropdownMenuTrigger>
-          {data?.avatarUrl ? (
-            <img src={data?.avatarUrl} alt='Avatar' />
+          {user?.avatarUrl ? (
+            <img src={user?.avatarUrl} alt='Avatar' />
           ) : (
             <User className='h-10 w-10 text-primary' />
           )}
