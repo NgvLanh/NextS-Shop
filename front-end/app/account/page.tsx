@@ -1,5 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
+
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import {
   Clock,
@@ -16,6 +17,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 import AccountForm from '../../components/form/account';
+import AvatarForm from '../../components/form/avatar';
 import ChangePasswordForm from '../../components/form/change-password';
 import Footer from '../../components/ui/footer';
 import Header from '../../components/ui/header';
@@ -127,9 +129,7 @@ export default function AccountPage() {
             <div className='md:col-span-1'>
               <div className='border rounded-lg overflow-hidden'>
                 <div className='bg-muted p-6 flex flex-col items-center'>
-                  <div className='w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4'>
-                    {!profile && <User className='h-10 w-10 text-primary' />}
-                  </div>
+                  <AvatarForm data={profile} />
                   <h2 className='font-bold text-lg'>
                     {profile && profile.fullName}
                   </h2>
@@ -193,7 +193,7 @@ export default function AccountPage() {
               <Tabs defaultValue='profile'>
                 <TabsContent value='profile' className='space-y-6'>
                   <AccountForm data={profile} onSubmit={handleupdateProfile} />
-                  <ChangePasswordForm />
+                  <ChangePasswordForm user={profile} />
                 </TabsContent>
 
                 <TabsContent value='orders' className='space-y-6'>
