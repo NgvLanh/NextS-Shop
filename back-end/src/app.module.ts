@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ApiTestController } from './api-test/api-test.controller';
-import { ApiTestModule } from './api-test/api-test.module';
 import { AuthModule } from './auth/auth.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { MailModule } from './mail/mail.module';
 import { RolesModule } from './roles/roles.module';
 import { UsersModule } from './users/users.module';
@@ -28,9 +27,9 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     UsersModule,
     MailModule,
-    ApiTestModule,
     RolesModule,
+    CloudinaryModule,
   ],
-  controllers: [ApiTestController],
+  controllers: [],
 })
 export class AppModule {}

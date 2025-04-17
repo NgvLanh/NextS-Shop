@@ -4,9 +4,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
 import { ApiResponse } from '../../configs/api-response';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { MailService } from '../mail/mail.service';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { User } from '../users/entities/user.entity';
+import { ChangePasswordDto } from './dto/changePassword.dto';
 import { SignInDto } from './dto/signIn.dto';
 import { SignUpDto } from './dto/signUp.dto';
 
@@ -19,6 +21,7 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly cloundinaryService: CloudinaryService,
   ) {}
 
   async signIn(signInDto: SignInDto) {
@@ -135,5 +138,72 @@ export class AuthService {
     const updatedUser = await this.userRepository.save(user);
     this.logger.log(`Cập nhật hồ sơ thành công user: ${req.user?.email}`);
     return ApiResponse.success('Cập nhật hồ sơ thành công!', updatedUser);
+  }
+
+  async changePassword(id: number, changePasswordDto: ChangePasswordDto, req) {
+    if (id !== req.user?.sub) {
+      throw new HttpException(
+        ApiResponse.error('Truy cập không được phép!'),
+        401,
+      );
+    }
+
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new HttpException(
+        ApiResponse.notFound('Không tìm thấy người dùng!'),
+        404,
+      );
+    }
+
+    if (
+      !(await bcrypt.compare(changePasswordDto.currentPassword, user.password))
+    ) {
+      throw new HttpException(
+        ApiResponse.error('Mật khẩu hiện tại không chính xác!'),
+        400,
+      );
+    } else if (
+      changePasswordDto.currentPassword === changePasswordDto.newPassword
+    ) {
+      throw new HttpException(
+        ApiResponse.error('Mật khẩu mới phải khác mật khẩu cũ!'),
+        400,
+      );
+    } else {
+      user.password = await bcrypt.hash(changePasswordDto.newPassword, 10);
+    }
+    const updatedUser = await this.userRepository.save(user);
+    const { password, isActive, verifyEmail, ...result } = updatedUser;
+    this.logger.log(`Cập nhật hồ sơ thành công user: ${req.user?.email}`);
+    return ApiResponse.success('Cập nhật hồ sơ thành công!', result);
+  }
+
+  async updateAvatar(id: number, avatar: string, req) {
+    if (id !== req.user?.sub) {
+      throw new HttpException(
+        ApiResponse.error('Truy cập không được phép!'),
+        401,
+      );
+    }
+
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new HttpException(
+        ApiResponse.notFound('Không tìm thấy người dùng!'),
+        404,
+      );
+    }
+
+    if (avatar.length < 1) {
+      user.avatarUrl = '';
+    } else {
+      user.avatarUrl = await this.cloundinaryService.uploadBase64(avatar);
+    }
+
+    const updatedUser = await this.userRepository.save(user);
+    const { password, isActive, verifyEmail, ...result } = updatedUser;
+    this.logger.log(`Cập nhật hình ảnh thành công user: ${req.user?.email}`);
+    return ApiResponse.success('Cập nhật hình ảnh thành công!', result);
   }
 }

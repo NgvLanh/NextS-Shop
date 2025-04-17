@@ -1,16 +1,30 @@
 'use client';
 import { Heart, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { toast } from '../../hooks/use-toast';
 import { verifyToken } from '../../services/authService';
 import { Button } from './button';
 
 export default function Header() {
   const [isAuth, setIsAuth] = useState(false);
+  const route = useRouter();
+
   useEffect(() => {
     const verify = async () => {
-      const result = await verifyToken();
-      setIsAuth(result.success);
+      try {
+        const result = await verifyToken();
+        setIsAuth(result.success);
+      } catch (error) {
+        toast({
+          title: 'Phiên phản hết hạn',
+          description: 'Vui lòng đăng nhập lại để tiếp tục!',
+          variant: 'destructive',
+        });
+        setIsAuth(false);
+        route.push('/login');
+      }
     };
     verify();
   }, []);

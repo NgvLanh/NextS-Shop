@@ -1,8 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Label } from '@radix-ui/react-label';
-import { useForm } from 'react-hook-form';
+import { FieldValues, useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { toast } from '../../hooks/use-toast';
+import { UserType } from '../../lib/types';
+import { ApiRequest, ApiResponse } from '../../services/apiRequest';
 import { Input } from '../ui/input';
 
 const changePasswordSchema = z
@@ -20,21 +23,51 @@ const changePasswordSchema = z
 
 type ChangePasswordData = z.infer<typeof changePasswordSchema>;
 
-export default function ChangePasswordForm() {
+export default function ChangePasswordForm({
+  user,
+}: {
+  user: UserType | null;
+}) {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(changePasswordSchema),
   });
 
-  const handleChangePassword = (data: ChangePasswordData) => {
+  const handleChangePassword = async (
+    id: number,
+    data: ChangePasswordData | FieldValues
+  ) => {
     console.log(data);
+    try {
+      const result = await ApiRequest<ApiResponse>(
+        `auth/change-password/${id}`,
+        'PUT',
+        data
+      );
+      console.log(result);
+      toast({
+        title: 'Thành công',
+        description: 'Cập nhật mật khật thành công!',
+      });
+      reset();
+    } catch (error: any) {
+      toast({
+        title: 'Thất bại',
+        description: error?.message || 'Cập nhật mật khẩu thất bại!',
+        variant: 'destructive',
+      });
+      console.log(error);
+    }
   };
   return (
     <form
-      onSubmit={handleSubmit(handleChangePassword as any)}
+      onSubmit={handleSubmit(
+        (data) => handleChangePassword(user?.id ?? 0, data) as any
+      )}
       className='border rounded-lg p-6'
     >
       <h2 className='text-xl font-bold mb-6'>Đổi Mật Khẩu</h2>

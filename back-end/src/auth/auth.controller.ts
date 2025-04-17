@@ -15,6 +15,7 @@ import { Response } from 'express';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
+import { ChangePasswordDto } from './dto/changePassword.dto';
 import { SignInDto } from './dto/signIn.dto';
 import { SignUpDto } from './dto/signUp.dto';
 
@@ -46,8 +47,12 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('verify-token')
   @HttpCode(200)
-  async verifyToken(@Req() req: Request) {
-    return await this.authService.verifyToken(req);
+  async verifyToken(@Req() req: Request, @Res() res: Response) {
+    const result = await this.authService.verifyToken(req);
+    if (!result.success) {
+      return res.redirect(`${process.env.CLIENT_URL}/login`);
+    }
+    return res.json(result);
   }
 
   @UseGuards(AuthGuard)
@@ -59,5 +64,27 @@ export class AuthController {
     @Req() req: Request,
   ) {
     return await this.authService.updateProfile(+id, updateUserDto, req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('change-password/:id')
+  @HttpCode(200)
+  async changePassword(
+    @Param('id') id: string,
+    @Body() changePasswordDto: ChangePasswordDto,
+    @Req() req: Request,
+  ) {
+    return await this.authService.changePassword(+id, changePasswordDto, req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('avatar/:id')
+  @HttpCode(200)
+  async updateAvatar(
+    @Param('id') id: string,
+    @Body() avatar: string,
+    @Req() req: Request,
+  ) {
+    return await this.authService.updateAvatar(+id, avatar, req);
   }
 }
