@@ -21,15 +21,12 @@ import AvatarForm from '../../components/form/avatar';
 import ChangePasswordForm from '../../components/form/change-password';
 import Footer from '../../components/ui/footer';
 import Header from '../../components/ui/header';
-import useAuth from '../../hooks/use-auth';
 import { toast } from '../../hooks/use-toast';
 import { UserType } from '../../lib/types';
 import { ApiRequest, ApiResponse } from '../../services/apiRequest';
 import { verifyToken } from '../../services/authService';
 
 export default function AccountPage() {
-  useAuth();
-
   const router = useRouter();
   const [profile, setProfile] = useState<UserType | null>(null);
 
@@ -65,6 +62,30 @@ export default function AccountPage() {
       toast({
         title: 'Thất bại',
         description: 'Cập nhật thông tin Thất bại!',
+        variant: 'destructive',
+      });
+      console.log(error);
+    }
+  };
+
+  const handleupdateAvatar = async (id: number, imageUrl: string) => {
+    try {
+      toast({
+        title: 'Đang cập nhật ...',
+        description: 'Vui lòng đợi vài giây!',
+      });
+      const result = await ApiRequest<ApiResponse>(`auth/avatar/${id}`, 'PUT', {
+        avatarUrl: imageUrl,
+      });
+      setProfile(result.data);
+      toast({
+        title: 'Thành công',
+        description: 'Cập nhật avatar thành công!',
+      });
+    } catch (error) {
+      toast({
+        title: 'Thất bại',
+        description: 'Cập nhật avatar Thất bại!',
         variant: 'destructive',
       });
       console.log(error);
@@ -129,7 +150,7 @@ export default function AccountPage() {
             <div className='md:col-span-1'>
               <div className='border rounded-lg overflow-hidden'>
                 <div className='bg-muted p-6 flex flex-col items-center'>
-                  <AvatarForm data={profile} />
+                  <AvatarForm user={profile} onSubmit={handleupdateAvatar} />
                   <h2 className='font-bold text-lg'>
                     {profile && profile.fullName}
                   </h2>

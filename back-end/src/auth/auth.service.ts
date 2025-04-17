@@ -179,7 +179,7 @@ export class AuthService {
     return ApiResponse.success('Cập nhật hồ sơ thành công!', result);
   }
 
-  async updateAvatar(id: number, avatar: string, req) {
+  async updateAvatar(id: number, avatarUrl: string, req) {
     if (id !== req.user?.sub) {
       throw new HttpException(
         ApiResponse.error('Truy cập không được phép!'),
@@ -194,12 +194,10 @@ export class AuthService {
         404,
       );
     }
-
-    if (avatar.length < 1) {
-      user.avatarUrl = '';
-    } else {
-      user.avatarUrl = await this.cloundinaryService.uploadBase64(avatar);
-    }
+    user.avatarUrl =
+      avatarUrl === ''
+        ? (user.avatarUrl = '')
+        : await this.cloundinaryService.uploadBase64(avatarUrl);
 
     const updatedUser = await this.userRepository.save(user);
     const { password, isActive, verifyEmail, ...result } = updatedUser;

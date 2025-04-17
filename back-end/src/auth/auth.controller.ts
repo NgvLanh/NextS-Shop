@@ -82,9 +82,9 @@ export class AuthController {
   @HttpCode(200)
   async updateAvatar(
     @Param('id') id: string,
-    @Body() avatar: string,
+    @Body() data: { avatarUrl: string },
     @Req() req: Request,
   ) {
-    return await this.authService.updateAvatar(+id, avatar, req);
+    return await this.authService.updateAvatar(+id, data.avatarUrl, req);
   }
 }
