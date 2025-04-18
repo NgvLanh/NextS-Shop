@@ -24,4 +24,4 @@ jobs:
           git merge origin/develop -m "Auto-merge from develop"
           git push origin main
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
