@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
@@ -14,8 +14,6 @@ import { SignUpDto } from './dto/signUp.dto';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
-
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -31,24 +29,25 @@ export class AuthService {
       where: { email, isActive: true },
       relations: { role: true },
     });
+
     if (user && !user.verifyEmail) {
       throw new HttpException(
         ApiResponse.error('Tài khoản chưa xác nhận email!'),
         401,
       );
     }
-    if (!user || bcrypt.compareSync(password, user.password) === false) {
-      this.logger.error(`Email hoặc mật khẩu không hợp lệ: ${email}`);
+
+    if (!user || !bcrypt.compareSync(password, user.password)) {
       throw new HttpException(
         ApiResponse.error('Email hoặc mật khẩu không hợp lệ!'),
         401,
       );
     }
 
-    this.logger.log(`Đăng nhập thành công: ${email}`);
     const { password: _, isActive, ...userData } = user;
     const payload = { sub: user.id, email: user.email };
     const token = this.jwtService.sign(payload);
+
     return ApiResponse.success('Đăng nhập thành công!', {
       accessToken: token,
       user: userData,
@@ -60,7 +59,6 @@ export class AuthService {
 
     const existingUser = await this.userRepository.findOneBy({ email });
     if (existingUser) {
-      this.logger.error(`Email đã tồn tại: ${email}`);
       throw new HttpException(ApiResponse.error('Email đã tồn tại'), 400);
     }
 
@@ -74,7 +72,6 @@ export class AuthService {
 
     this.mailService.sendUserConfirmation(savedUser, token);
 
-    this.logger.log(`Đăng ký người dùng thành công: ${email}`);
     return ApiResponse.success('Đăng ký thành công', userData);
   }
 
@@ -85,7 +82,6 @@ export class AuthService {
 
       const user = await this.userRepository.findOneBy({ email });
       if (!user) {
-        this.logger.error(`Không tìm thấy người dùng với email: ${email}`);
         throw new HttpException(
           ApiResponse.notFound('Không tìm thấy người dùng'),
           404,
@@ -95,10 +91,8 @@ export class AuthService {
       user.verifyEmail = true;
       await this.userRepository.save(user);
 
-      this.logger.log(`Xác nhận email thành công: ${email}`);
       return ApiResponse.success(`Xác nhận email ${email} thành công!`);
     } catch (error) {
-      this.logger.error('Token không hợp lệ hoặc đã hết hạn', error.stack);
       throw new HttpException(
         ApiResponse.error('Token không hợp lệ hoặc đã hết hạn'),
         400,
@@ -107,25 +101,34 @@ export class AuthService {
   }
 
   async verifyToken(req) {
-    this.logger.log('Xác minh token người dùng thành công');
-    const id = req.user?.sub;
-    const user = await this.userRepository.findOneBy({ id });
+    const userId = req.user?.sub;
+
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new HttpException(
+        ApiResponse.notFound('Không tìm thấy người dùng!'),
+        404,
+      );
+    }
+
     const { password, verifyEmail, isActive, ...result } = user;
     return ApiResponse.success('Xác minh token người dùng thành công', result);
   }
 
-  async updateProfile(id: number, updateUserDto: UpdateUserDto, req) {
-    if (id !== req.user?.sub) {
+  async updateProfile(updateUserDto: UpdateUserDto, req) {
+    const userId = req.user?.sub;
+
+    if (!userId) {
       throw new HttpException(
         ApiResponse.error('Truy cập không được phép!'),
         401,
       );
     }
 
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) {
       throw new HttpException(
-        ApiResponse.notFound('Không tìm thấy người dùng'),
+        ApiResponse.notFound('Không tìm thấy người dùng!'),
         404,
       );
     }
@@ -135,20 +138,28 @@ export class AuthService {
       updatedAt: new Date(),
     });
 
-    const updatedUser = await this.userRepository.save(user);
-    this.logger.log(`Cập nhật hồ sơ thành công user: ${req.user?.email}`);
-    return ApiResponse.success('Cập nhật hồ sơ thành công!', updatedUser);
+    try {
+      const updatedUser = await this.userRepository.save(user);
+      return ApiResponse.success('Cập nhật hồ sơ thành công!', updatedUser);
+    } catch (error) {
+      throw new HttpException(
+        ApiResponse.error('Đã xảy ra lỗi khi cập nhật hồ sơ!'),
+        500,
+      );
+    }
   }
 
-  async changePassword(id: number, changePasswordDto: ChangePasswordDto, req) {
-    if (id !== req.user?.sub) {
+  async changePassword(changePasswordDto: ChangePasswordDto, req) {
+    const userId = req.user?.sub;
+
+    if (!userId) {
       throw new HttpException(
         ApiResponse.error('Truy cập không được phép!'),
         401,
       );
     }
 
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) {
       throw new HttpException(
         ApiResponse.notFound('Không tìm thấy người dùng!'),
@@ -156,52 +167,71 @@ export class AuthService {
       );
     }
 
-    if (
-      !(await bcrypt.compare(changePasswordDto.currentPassword, user.password))
-    ) {
+    const isCurrentPasswordValid = await bcrypt.compare(
+      changePasswordDto.currentPassword,
+      user.password,
+    );
+
+    if (!isCurrentPasswordValid) {
       throw new HttpException(
         ApiResponse.error('Mật khẩu hiện tại không chính xác!'),
         400,
       );
-    } else if (
-      changePasswordDto.currentPassword === changePasswordDto.newPassword
-    ) {
+    }
+
+    if (changePasswordDto.currentPassword === changePasswordDto.newPassword) {
       throw new HttpException(
         ApiResponse.error('Mật khẩu mới phải khác mật khẩu cũ!'),
         400,
       );
-    } else {
-      user.password = await bcrypt.hash(changePasswordDto.newPassword, 10);
     }
-    const updatedUser = await this.userRepository.save(user);
-    const { password, isActive, verifyEmail, ...result } = updatedUser;
-    this.logger.log(`Cập nhật hồ sơ thành công user: ${req.user?.email}`);
-    return ApiResponse.success('Cập nhật hồ sơ thành công!', result);
+
+    try {
+      user.password = await bcrypt.hash(changePasswordDto.newPassword, 10);
+      const updatedUser = await this.userRepository.save(user);
+
+      const { password, isActive, verifyEmail, ...result } = updatedUser;
+      return ApiResponse.success('Cập nhật mật khẩu thành công!', result);
+    } catch (error) {
+      throw new HttpException(
+        ApiResponse.error('Đã xảy ra lỗi khi cập nhật mật khẩu!'),
+        500,
+      );
+    }
   }
 
-  async updateAvatar(id: number, avatarUrl: string, req) {
-    if (id !== req.user?.sub) {
+  async updateAvatar(avatarUrl: string, req) {
+    const userId = req.user?.sub;
+
+    if (!userId) {
       throw new HttpException(
         ApiResponse.error('Truy cập không được phép!'),
         401,
       );
     }
 
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) {
       throw new HttpException(
         ApiResponse.notFound('Không tìm thấy người dùng!'),
         404,
       );
     }
-    user.avatarUrl =
-      avatarUrl === ''
-        ? (user.avatarUrl = '')
-        : await this.cloundinaryService.uploadBase64(avatarUrl);
 
-    const updatedUser = await this.userRepository.save(user);
-    const { password, isActive, verifyEmail, ...result } = updatedUser;
-    this.logger.log(`Cập nhật hình ảnh thành công user: ${req.user?.email}`);
-    return ApiResponse.success('Cập nhật hình ảnh thành công!', result);
+    try {
+      user.avatarUrl = avatarUrl
+        ? await this.cloundinaryService.uploadBase64(avatarUrl)
+        : '';
+
+      const updatedUser = await this.userRepository.save(user);
+      const { password, isActive, verifyEmail, ...result } = updatedUser;
+
+      return ApiResponse.success('Cập nhật hình ảnh thành công!', result);
+    } catch (error) {
+      throw new HttpException(
+        ApiResponse.error('Đã xảy ra lỗi khi cập nhật hình ảnh!'),
+        500,
+      );
+    }
   }
 }

@@ -43,16 +43,9 @@ export default function AccountPage() {
     }
   };
 
-  const handleupdateProfile = async (
-    id: number,
-    data: UserType | null | FieldValues
-  ) => {
+  const handleupdateProfile = async (data: UserType | null | FieldValues) => {
     try {
-      const result = await ApiRequest<ApiResponse>(
-        `auth/profile/${id}`,
-        'PUT',
-        data
-      );
+      const result = await ApiRequest<ApiResponse>(`auth/profile`, 'PUT', data);
       setProfile(result.data);
       toast({
         title: 'Thành công',
@@ -68,13 +61,13 @@ export default function AccountPage() {
     }
   };
 
-  const handleupdateAvatar = async (id: number, imageUrl: string) => {
+  const handleupdateAvatar = async (imageUrl: string) => {
     try {
       toast({
         title: 'Đang cập nhật ...',
         description: 'Vui lòng đợi vài giây!',
       });
-      const result = await ApiRequest<ApiResponse>(`auth/avatar/${id}`, 'PUT', {
+      const result = await ApiRequest<ApiResponse>(`auth/avatar`, 'PUT', {
         avatarUrl: imageUrl,
       });
       setProfile(result.data);

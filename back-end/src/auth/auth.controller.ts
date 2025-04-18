@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   HttpCode,
-  Param,
   Post,
   Put,
   Query,
@@ -56,35 +55,29 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
-  @Put('profile/:id')
+  @Put('profile')
   @HttpCode(200)
   async updateProfile(
-    @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
     @Req() req: Request,
   ) {
-    return await this.authService.updateProfile(+id, updateUserDto, req);
+    return await this.authService.updateProfile(updateUserDto, req);
   }
 
   @UseGuards(AuthGuard)
-  @Put('change-password/:id')
+  @Put('change-password')
   @HttpCode(200)
   async changePassword(
-    @Param('id') id: string,
     @Body() changePasswordDto: ChangePasswordDto,
     @Req() req: Request,
   ) {
-    return await this.authService.changePassword(+id, changePasswordDto, req);
+    return await this.authService.changePassword(changePasswordDto, req);
   }
 
   @UseGuards(AuthGuard)
-  @Put('avatar/:id')
+  @Put('avatar')
   @HttpCode(200)
-  async updateAvatar(
-    @Param('id') id: string,
-    @Body() data: { avatarUrl: string },
-    @Req() req: Request,
-  ) {
-    return await this.authService.updateAvatar(+id, data.avatarUrl, req);
+  async updateAvatar(@Body() data: { avatarUrl: string }, @Req() req: Request) {
+    return await this.authService.updateAvatar(data.avatarUrl, req);
   }
 }

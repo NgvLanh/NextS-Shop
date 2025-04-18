@@ -12,3 +12,10 @@ export const imageToBase64 = (file: File): Promise<string> =>
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = reject;
   });
+
+export function formatCurrencyVND(amount: number): string {
+  return Number(amount).toLocaleString('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+  });
+}

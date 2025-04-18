@@ -17,7 +17,7 @@ INSERT INTO users (email, encrypted_password, full_name, phone, avatar_url, role
 ('user10@example.com', 'hashedpwd10', 'Jane Dương', '0990123456', NULL, 2);
 
 -- USER ADDRESSES
-INSERT INTO user_addresses (user_id, recipient, phone, address) VALUES
+INSERT INTO addresses (user_id, recipient, phone, address) VALUES
 (1, 'Alice Nguyễn', '0901234567', '{"street": "123 Lê Lợi", "city": "Hà Nội", "district": "Ba Đình", "ward": "Phúc Xá", "postal_code": "100000"}'),
 (2, 'Bob Trần', '0912345678', '{"street": "456 Nguyễn Trãi", "city": "HCM", "district": "Quận 5", "ward": "Phường 3", "postal_code": "700000"}');
 
