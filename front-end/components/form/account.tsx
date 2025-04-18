@@ -22,7 +22,7 @@ type ProfileData = z.infer<typeof profileSchema>;
 
 type AccountFormProps = {
   data: UserType | null;
-  onSubmit: (id: number, data: ProfileData | null | FieldValues) => void;
+  onSubmit: (data: ProfileData | null | FieldValues) => void;
 };
 
 export default function AccountForm({ data, onSubmit }: AccountFormProps) {
@@ -52,16 +52,13 @@ export default function AccountForm({ data, onSubmit }: AccountFormProps) {
   }, [data, reset]);
 
   const handleupdateProfile = async (
-    id: number,
     data: ProfileData | null | FieldValues
   ) => {
-    onSubmit(id, data);
+    onSubmit(data);
   };
   return (
     <form
-      onSubmit={handleSubmit(
-        (data) => handleupdateProfile(profile?.id ?? 0, data) as any
-      )}
+      onSubmit={handleSubmit(handleupdateProfile as any)}
       className='border rounded-lg p-6'
     >
       <h2 className='text-xl font-bold mb-6'>Thông Tin Hồ Sơ</h2>

@@ -18,3 +18,22 @@ export type BannerType = {
   description: string;
   imageUrl: string;
 };
+
+export type ProductType = {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  basePrice: number;
+  price: number;
+  imageUrl: string;
+  category: CategoryType;
+  variants: object;
+};
+
+export type CategoryType = {
+  id: number;
+  name: string;
+  slug: string;
+  imageUrl: string;
+};

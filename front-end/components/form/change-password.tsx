@@ -38,13 +38,12 @@ export default function ChangePasswordForm({
   });
 
   const handleChangePassword = async (
-    id: number,
     data: ChangePasswordData | FieldValues
   ) => {
     console.log(data);
     try {
       const result = await ApiRequest<ApiResponse>(
-        `auth/change-password/${id}`,
+        `auth/change-password`,
         'PUT',
         data
       );
@@ -65,9 +64,7 @@ export default function ChangePasswordForm({
   };
   return (
     <form
-      onSubmit={handleSubmit(
-        (data) => handleChangePassword(user?.id ?? 0, data) as any
-      )}
+      onSubmit={handleSubmit(handleChangePassword as any)}
       className='border rounded-lg p-6'
     >
       <h2 className='text-xl font-bold mb-6'>Đổi Mật Khẩu</h2>

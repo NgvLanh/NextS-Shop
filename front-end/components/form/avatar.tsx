@@ -25,7 +25,7 @@ import { imageToBase64 } from '../../lib/utils';
 
 type AvatarFormProps = {
   user: UserType | null;
-  onSubmit: (id: number, imageUrl: string) => void;
+  onSubmit: (imageUrl: string) => void;
 };
 
 export default function AvatarForm({ user, onSubmit }: AvatarFormProps) {
@@ -36,7 +36,7 @@ export default function AvatarForm({ user, onSubmit }: AvatarFormProps) {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
       const base64 = await imageToBase64(file);
-      onSubmit(user!.id, base64);
+      onSubmit(base64);
     }
   };
 
@@ -45,7 +45,7 @@ export default function AvatarForm({ user, onSubmit }: AvatarFormProps) {
   };
 
   const handleDeleteAvatar = () => {
-    onSubmit(user!.id, '');
+    onSubmit('');
     setOpen(false);
   };
 
