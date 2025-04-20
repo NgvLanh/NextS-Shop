@@ -2,8 +2,8 @@ import { Button } from '@/components/ui/button';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import Footer from '../../components/ui/footer';
-import Header from '../../components/ui/header';
+import Footer from '../../components/footer';
+import Header from '../../components/header';
 
 export default function AboutPage() {
   return (
@@ -16,11 +16,11 @@ export default function AboutPage() {
             <div className='flex flex-col items-center justify-center space-y-4 text-center'>
               <div className='space-y-2'>
                 <h1 className='text-3xl font-bold tracking-tighter sm:text-5xl'>
-                  About NextS
+                  Giới thiệu về NextS
                 </h1>
                 <p className='max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed'>
-                  Discover our story, mission, and the team behind your favorite
-                  online shopping destination.
+                  Khám phá câu chuyện, sứ mệnh và đội ngũ đứng sau điểm đến mua
+                  sắm trực tuyến yêu thích của bạn.
                 </p>
               </div>
             </div>
@@ -33,28 +33,28 @@ export default function AboutPage() {
             <div className='grid gap-6 lg:grid-cols-2 lg:gap-12 items-center'>
               <div className='space-y-4'>
                 <div className='inline-block rounded-lg bg-muted px-3 py-1 text-sm'>
-                  Our Story
+                  Câu chuyện của chúng tôi
                 </div>
                 <h2 className='text-3xl font-bold tracking-tighter md:text-4xl/tight'>
-                  From a Small Idea to Your Favorite Shop
+                  Từ một ý tưởng nhỏ đến cửa hàng yêu thích của bạn
                 </h2>
                 <p className='max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed'>
-                  Founded in 2015, NextS began as a small passion project with a
-                  simple mission: to provide high-quality products at affordable
-                  prices with exceptional customer service.
+                  Được thành lập vào năm 2015, NextS bắt đầu như một dự án đam
+                  mê nhỏ với sứ mệnh đơn giản: cung cấp các sản phẩm chất lượng
+                  cao với giá cả phải chăng và dịch vụ khách hàng xuất sắc.
                 </p>
                 <p className='max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed'>
-                  What started as a tiny online store run from a garage has
-                  grown into a beloved shopping destination serving thousands of
-                  customers worldwide. Our journey has been defined by our
-                  commitment to quality, sustainability, and putting our
-                  customers first.
+                  Những gì bắt đầu như một cửa hàng trực tuyến nhỏ từ một nhà để
+                  xe đã phát triển thành một điểm đến mua sắm được yêu thích
+                  phục vụ hàng ngàn khách hàng trên toàn thế giới. Hành trình
+                  của chúng tôi được định hình bởi cam kết về chất lượng, bền
+                  vững và đặt khách hàng lên hàng đầu.
                 </p>
               </div>
               <div className='mx-auto w-full max-w-[500px] overflow-hidden rounded-xl'>
                 <Image
-                  src='/placeholder.svg?height=600&width=800'
-                  alt='Our story'
+                  src='https://plus.unsplash.com/premium_photo-1726754536800-0acef93c5ad3?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bGl0dGxlJTIwdGhpbmdzfGVufDB8fDB8fHww'
+                  alt='Câu chuyện của chúng tôi'
                   width={800}
                   height={600}
                   className='object-cover w-full h-full'
@@ -70,14 +70,14 @@ export default function AboutPage() {
             <div className='flex flex-col items-center justify-center space-y-4 text-center'>
               <div className='space-y-2'>
                 <div className='inline-block rounded-lg bg-background px-3 py-1 text-sm'>
-                  Our Mission
+                  Sứ mệnh của chúng tôi
                 </div>
                 <h2 className='text-3xl font-bold tracking-tighter md:text-4xl/tight'>
-                  Creating a Better Shopping Experience
+                  Tạo ra trải nghiệm mua sắm tốt hơn
                 </h2>
                 <p className='max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed'>
-                  At NextS, we're committed to redefining online shopping
-                  through quality, sustainability, and exceptional service.
+                  Tại NextS, chúng tôi cam kết định nghĩa lại mua sắm trực tuyến
+                  thông qua chất lượng, bền vững và dịch vụ xuất sắc.
                 </p>
               </div>
             </div>
@@ -86,30 +86,32 @@ export default function AboutPage() {
                 <div className='flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground'>
                   <Star className='h-6 w-6' />
                 </div>
-                <h3 className='text-xl font-bold'>Quality First</h3>
+                <h3 className='text-xl font-bold'>Chất lượng hàng đầu</h3>
                 <p className='text-muted-foreground'>
-                  We carefully select every product in our catalog to ensure it
-                  meets our high standards for quality and durability.
+                  Chúng tôi cẩn thận chọn từng sản phẩm trong danh mục của mình
+                  để đảm bảo nó đáp ứng tiêu chuẩn cao về chất lượng và độ bền.
                 </p>
               </div>
               <div className='flex flex-col justify-center space-y-4'>
                 <div className='flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground'>
                   <Star className='h-6 w-6' />
                 </div>
-                <h3 className='text-xl font-bold'>Sustainability</h3>
+                <h3 className='text-xl font-bold'>Bền vững</h3>
                 <p className='text-muted-foreground'>
-                  We're committed to reducing our environmental impact through
-                  eco-friendly packaging and sustainable sourcing practices.
+                  Chúng tôi cam kết giảm tác động môi trường thông qua bao bì
+                  thân thiện với môi trường và các phương pháp nguồn cung bền
+                  vững.
                 </p>
               </div>
               <div className='flex flex-col justify-center space-y-4'>
                 <div className='flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground'>
                   <Star className='h-6 w-6' />
                 </div>
-                <h3 className='text-xl font-bold'>Customer Happiness</h3>
+                <h3 className='text-xl font-bold'>Hạnh phúc của khách hàng</h3>
                 <p className='text-muted-foreground'>
-                  Our dedicated support team works tirelessly to ensure every
-                  customer has a positive and memorable shopping experience.
+                  Đội ngũ hỗ trợ tận tâm của chúng tôi làm việc không mệt mỏi để
+                  đảm bảo mỗi khách hàng có trải nghiệm mua sắm tích cực và đáng
+                  nhớ.
                 </p>
               </div>
             </div>
@@ -122,47 +124,48 @@ export default function AboutPage() {
             <div className='flex flex-col items-center justify-center space-y-4 text-center'>
               <div className='space-y-2'>
                 <div className='inline-block rounded-lg bg-muted px-3 py-1 text-sm'>
-                  Our Team
+                  Đội ngũ của chúng tôi
                 </div>
                 <h2 className='text-3xl font-bold tracking-tighter md:text-4xl/tight'>
-                  Meet the People Behind NextS
+                  Gặp gỡ những người đứng sau NextS
                 </h2>
                 <p className='max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed'>
-                  Our diverse team of passionate individuals works together to
-                  bring you the best shopping experience.
+                  Đội ngũ đa dạng của chúng tôi gồm những cá nhân đam mê làm
+                  việc cùng nhau để mang đến cho bạn trải nghiệm mua sắm tốt
+                  nhất.
                 </p>
               </div>
             </div>
             <div className='mx-auto grid max-w-5xl gap-6 py-12 md:grid-cols-2 lg:grid-cols-3'>
               {[
                 {
-                  name: 'Sarah Johnson',
-                  role: 'Founder & CEO',
+                  name: 'Nguyễn Văn Lành',
+                  role: 'Người sáng lập & CEO',
                   image: '/placeholder.svg?height=400&width=400&text=Sarah',
                 },
                 {
-                  name: 'Michael Chen',
-                  role: 'Head of Product',
+                  name: 'Nguyễn Văn Lành',
+                  role: 'Trưởng phòng sản phẩm',
                   image: '/placeholder.svg?height=400&width=400&text=Michael',
                 },
                 {
-                  name: 'Emily Rodriguez',
-                  role: 'Customer Experience',
+                  name: 'Nguyễn Văn Lành',
+                  role: 'Trải nghiệm khách hàng',
                   image: '/placeholder.svg?height=400&width=400&text=Emily',
                 },
                 {
-                  name: 'David Kim',
-                  role: 'Lead Designer',
+                  name: 'Nguyễn Văn Lành',
+                  role: 'Trưởng nhóm thiết kế',
                   image: '/placeholder.svg?height=400&width=400&text=David',
                 },
                 {
-                  name: 'Jessica Patel',
-                  role: 'Marketing Director',
+                  name: 'Nguyễn Văn Lành',
+                  role: 'Giám đốc Marketing',
                   image: '/placeholder.svg?height=400&width=400&text=Jessica',
                 },
                 {
-                  name: 'Robert Wilson',
-                  role: 'Operations Manager',
+                  name: 'Nguyễn Văn Lành',
+                  role: 'Quản lý vận hành',
                   image: '/placeholder.svg?height=400&width=400&text=Robert',
                 },
               ].map((member, index) => (
@@ -197,59 +200,59 @@ export default function AboutPage() {
             <div className='flex flex-col items-center justify-center space-y-4 text-center'>
               <div className='space-y-2'>
                 <div className='inline-block rounded-lg bg-background px-3 py-1 text-sm'>
-                  Testimonials
+                  Lời chứng thực
                 </div>
                 <h2 className='text-3xl font-bold tracking-tighter md:text-4xl/tight'>
-                  What Our Customers Say
+                  Những gì khách hàng của chúng tôi nói
                 </h2>
                 <p className='max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed'>
-                  Don't just take our word for it. Here's what our customers
-                  have to say about their NextS experience.
+                  Đừng chỉ nghe chúng tôi nói. Đây là những gì khách hàng của
+                  chúng tôi nói về trải nghiệm NextS của họ.
                 </p>
               </div>
             </div>
             <div className='mx-auto grid max-w-5xl gap-6 py-12 md:grid-cols-2 lg:grid-cols-3'>
               {[
                 {
-                  name: 'Alex T.',
+                  name: 'Nguyễn Văn Lành',
                   location: 'New York, NY',
                   quote:
-                    'NextS has been my go-to for quality products. Their customer service is unmatched!',
+                    'NextS đã trở thành nơi tôi tin tưởng để mua các sản phẩm chất lượng. Dịch vụ khách hàng của họ không ai sánh kịp!',
                   rating: 5,
                 },
                 {
-                  name: 'Maria S.',
+                  name: 'Nguyễn Văn Lành',
                   location: 'Los Angeles, CA',
                   quote:
-                    'I love how easy it is to find exactly what I need. The website is intuitive and shipping is always fast.',
+                    'Tôi thích cách dễ dàng để tìm chính xác những gì tôi cần. Trang web rất trực quan và giao hàng luôn nhanh chóng.',
                   rating: 5,
                 },
                 {
-                  name: 'James L.',
+                  name: 'Nguyễn Văn Lành',
                   location: 'Chicago, IL',
                   quote:
-                    "The quality of products I've received has always exceeded my expectations. Highly recommend!",
+                    'Chất lượng của các sản phẩm tôi nhận được luôn vượt quá mong đợi của tôi. Rất khuyến khích!',
                   rating: 4,
                 },
                 {
-                  name: 'Sophia R.',
+                  name: 'Nguyễn Văn Lành',
                   location: 'Miami, FL',
                   quote:
-                    "NextS offers the perfect balance of quality and affordability. I'm a customer for life!",
+                    'NextS cung cấp sự cân bằng hoàn hảo giữa chất lượng và giá cả phải chăng. Tôi là khách hàng suốt đời!',
                   rating: 5,
                 },
                 {
-                  name: 'Daniel K.',
+                  name: 'Nguyễn Văn Lành',
                   location: 'Seattle, WA',
                   quote:
-                    'Their commitment to sustainability is what keeps me coming back. Great products with a conscience.',
+                    'Cam kết của họ đối với bền vững là lý do tôi tiếp tục quay lại. Sản phẩm tuyệt vời với lương tâm.',
                   rating: 5,
                 },
                 {
-                  name: 'Olivia P.',
+                  name: 'Nguyễn Văn Lành',
                   location: 'Austin, TX',
                   quote:
-                    'The attention to detail in packaging and product quality is impressive. Never disappointed!',
+                    'Sự chú ý đến chi tiết trong đóng gói và chất lượng sản phẩm rất ấn tượng. Không bao giờ thất vọng!',
                   rating: 4,
                 },
               ].map((testimonial, index) => (
@@ -292,19 +295,19 @@ export default function AboutPage() {
             <div className='flex flex-col items-center justify-center space-y-4 text-center'>
               <div className='space-y-2'>
                 <h2 className='text-3xl font-bold tracking-tighter md:text-4xl/tight'>
-                  NextS by the Numbers
+                  NextS qua các con số
                 </h2>
                 <p className='max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed'>
-                  Our growth and impact over the years.
+                  Sự phát triển và ảnh hưởng của chúng tôi qua các năm.
                 </p>
               </div>
             </div>
             <div className='mx-auto grid max-w-5xl gap-6 py-12 md:grid-cols-2 lg:grid-cols-4'>
               {[
-                { number: '50K+', label: 'Happy Customers' },
-                { number: '100+', label: 'Countries Served' },
-                { number: '5K+', label: 'Products' },
-                { number: '99%', label: 'Satisfaction Rate' },
+                { number: '50K+', label: 'Khách hàng hài lòng' },
+                { number: '100+', label: 'Quốc gia phục vụ' },
+                { number: '5K+', label: 'Sản phẩm' },
+                { number: '99%', label: 'Tỷ lệ hài lòng' },
               ].map((stat, index) => (
                 <div
                   key={index}
@@ -326,20 +329,20 @@ export default function AboutPage() {
             <div className='flex flex-col items-center justify-center space-y-4 text-center'>
               <div className='space-y-2'>
                 <h2 className='text-3xl font-bold tracking-tighter md:text-4xl/tight'>
-                  Ready to Experience NextS?
+                  Sẵn sàng trải nghiệm NextS?
                 </h2>
                 <p className='max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed'>
-                  Join thousands of satisfied customers and discover why NextS
-                  is the preferred online shopping destination.
+                  Tham gia hàng ngàn khách hàng hài lòng và khám phá lý do tại
+                  sao NextS là điểm đến mua sắm trực tuyến được ưa chuộng.
                 </p>
               </div>
               <div className='flex flex-col gap-2 min-[400px]:flex-row'>
                 <Link href='/products'>
-                  <Button size='lg'>Shop Now</Button>
+                  <Button size='lg'>Mua sắm ngay</Button>
                 </Link>
                 <Link href='/contact'>
                   <Button size='lg' variant='outline'>
-                    Contact Us
+                    Liên hệ với chúng tôi
                   </Button>
                 </Link>
               </div>

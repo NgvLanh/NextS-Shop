@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApiResponse } from '../../configs/api-response';
+import { Category } from '../categories/entities/category.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Category } from './entities/category.entity';
 import { ProductVariant } from './entities/product-variant.entity';
 import { Product } from './entities/product.entity';
 
@@ -39,6 +39,7 @@ export class ProductsService {
         basePrice: product.basePrice,
         imageUrl: firstVariant?.imageUrl || null,
         price: firstVariant?.price || null,
+        createdAt: product.createdAt,
         category: product.category
           ? { id: product.category.id, name: product.category.name }
           : null,

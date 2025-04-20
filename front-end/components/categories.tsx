@@ -1,7 +1,29 @@
+'use client';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import { Autoplay, Navigation } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { CategoryType } from '../lib/types';
+import { ApiRequest, ApiResponse } from '../services/apiRequest';
 
 export default function Categories() {
+  const [categories, setCategories] = useState<CategoryType[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await ApiRequest<ApiResponse>('categories', 'GET');
+        setCategories(result.data || []);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   return (
     <section className='w-full py-12 md:py-24 bg-muted'>
       <div className='container mx-auto px-4 md:px-6'>
@@ -15,29 +37,69 @@ export default function Categories() {
             </p>
           </div>
         </div>
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8'>
-          {['Điện tử', 'Quần áo', 'Nhà & Bếp', 'Làm đẹp'].map((category) => (
-            <Link
-              href={`/categories/${category.toLowerCase().replace(' & ', '-')}`}
-              key={category}
-              className='group'
+        <div className='mt-8'>
+          {categories.length > 4 ? (
+            <Swiper
+              modules={[Navigation, Autoplay]}
+              spaceBetween={16}
+              slidesPerView={1}
+              autoplay={{ delay: 3000, disableOnInteraction: false }}
+              breakpoints={{
+                640: { slidesPerView: 2 },
+                1024: { slidesPerView: 4 },
+              }}
             >
-              <div className='relative overflow-hidden rounded-lg'>
-                <div className='aspect-square'>
-                  <Image
-                    src={`/placeholder.svg?height=400&width=400&text=${category}`}
-                    alt={category}
-                    width={400}
-                    height={400}
-                    className='object-cover w-full h-full transition-transform group-hover:scale-105'
-                  />
-                </div>
-                <div className='absolute inset-0 bg-black/30 flex items-center justify-center'>
-                  <h3 className='text-white text-xl font-bold'>{category}</h3>
-                </div>
-              </div>
-            </Link>
-          ))}
+              {categories.map((category) => (
+                <SwiperSlide key={category.id}>
+                  <Link href={`#`} className='group'>
+                    <div className='relative overflow-hidden rounded-lg'>
+                      <div className='aspect-square'>
+                        <Image
+                          src={category.imageUrl}
+                          alt={category.name}
+                          width={400}
+                          height={400}
+                          className='object-cover w-full h-full transition-transform group-hover:scale-105'
+                        />
+                      </div>
+                      <div className='absolute inset-0 bg-black/30 flex items-center justify-center'>
+                        <h3 className='text-white text-xl font-bold'>
+                          {category.name}
+                        </h3>
+                      </div>
+                    </div>
+                  </Link>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          ) : (
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
+              {categories.map((category) => (
+                <Link
+                  href={`/categories/${category.name}`}
+                  key={category.id}
+                  className='group'
+                >
+                  <div className='relative overflow-hidden rounded-lg'>
+                    <div className='aspect-square'>
+                      <Image
+                        src={category.imageUrl}
+                        alt={category.name}
+                        width={400}
+                        height={400}
+                        className='object-cover w-full h-full transition-transform group-hover:scale-105'
+                      />
+                    </div>
+                    <div className='absolute inset-0 bg-black/30 flex items-center justify-center'>
+                      <h3 className='text-white text-xl font-bold'>
+                        {category.name}
+                      </h3>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

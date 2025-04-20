@@ -1,8 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { verifyToken } from '../../services/authService';
-import DesktopHeader from './DesktopHeader';
-import MobileHeader from './MobileHeader';
+import { verifyToken } from '../services/authService';
+import DesktopHeader from './desktop-header';
+import MobileHeader from './mobile-header';
 
 export default function Header() {
   const [isAuth, setIsAuth] = useState(false);

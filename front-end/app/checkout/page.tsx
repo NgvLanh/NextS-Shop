@@ -14,8 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Check, CreditCard } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
-import Footer from '../../components/ui/footer';
-import Header from '../../components/ui/header';
+import Footer from '../../components/footer';
+import Header from '../../components/header';
 
 export default function CheckoutPage() {
   const [step, setStep] = useState(1);

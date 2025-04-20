@@ -1,6 +1,6 @@
 import { Heart, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from './button';
+import { Button } from './ui/button';
 
 export default function DesktopHeader(auth: { auth: boolean }) {
   return (
