@@ -1,69 +1,27 @@
+'use client';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
-import Footer from '../../components/ui/footer';
-import Header from '../../components/ui/header';
+import { useEffect, useState } from 'react';
+import Footer from '../../components/footer';
+import Header from '../../components/header';
+import { CategoryType } from '../../lib/types';
+import { ApiRequest, ApiResponse } from '../../services/apiRequest';
 
 export default function CategoriesPage() {
-  // Mock categories data
-  const categories = [
-    {
-      id: 1,
-      name: 'Electronics',
-      description: 'Gadgets, devices, and tech accessories',
-      image: '/placeholder.svg?height=400&width=400&text=Electronics',
-      productCount: 124,
-    },
-    {
-      id: 2,
-      name: 'Clothing',
-      description: 'Fashion items for all ages and styles',
-      image: '/placeholder.svg?height=400&width=400&text=Clothing',
-      productCount: 98,
-    },
-    {
-      id: 3,
-      name: 'Home & Kitchen',
-      description: 'Everything for your home and kitchen needs',
-      image: '/placeholder.svg?height=400&width=400&text=Home',
-      productCount: 76,
-    },
-    {
-      id: 4,
-      name: 'Beauty',
-      description: 'Skincare, makeup, and personal care products',
-      image: '/placeholder.svg?height=400&width=400&text=Beauty',
-      productCount: 52,
-    },
-    {
-      id: 5,
-      name: 'Sports & Outdoors',
-      description: 'Equipment and gear for all your activities',
-      image: '/placeholder.svg?height=400&width=400&text=Sports',
-      productCount: 43,
-    },
-    {
-      id: 6,
-      name: 'Books',
-      description: 'Fiction, non-fiction, and educational titles',
-      image: '/placeholder.svg?height=400&width=400&text=Books',
-      productCount: 87,
-    },
-    {
-      id: 7,
-      name: 'Toys & Games',
-      description: 'Fun for all ages with toys and games',
-      image: '/placeholder.svg?height=400&width=400&text=Toys',
-      productCount: 65,
-    },
-    {
-      id: 8,
-      name: 'Automotive',
-      description: 'Parts, accessories, and tools for vehicles',
-      image: '/placeholder.svg?height=400&width=400&text=Auto',
-      productCount: 34,
-    },
-  ];
+  const [categories, setCategories] = useState<CategoryType[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await ApiRequest<ApiResponse>('categories', 'GET');
+        setCategories(result.data || []);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   return (
     <div className='flex flex-col min-h-screen'>
@@ -75,11 +33,12 @@ export default function CategoriesPage() {
             <div className='flex flex-col items-center justify-center space-y-4 text-center'>
               <div className='space-y-2'>
                 <h1 className='text-3xl font-bold tracking-tighter sm:text-5xl'>
-                  Shop by Category
+                  Mua sắm theo danh mục
                 </h1>
                 <p className='max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed'>
-                  Browse our wide selection of products organized by category to
-                  find exactly what you're looking for.
+                  Duyệt qua danh sách sản phẩm đa dạng của chúng tôi được tổ
+                  chức theo danh mục để tìm chính xác những gì bạn đang tìm
+                  kiếm.
                 </p>
               </div>
             </div>
@@ -98,7 +57,7 @@ export default function CategoriesPage() {
                 >
                   <div className='relative aspect-square overflow-hidden'>
                     <Image
-                      src={category.image || '/placeholder.svg'}
+                      src={category.imageUrl || '/placeholder.svg'}
                       alt={category.name}
                       width={400}
                       height={400}
@@ -108,10 +67,10 @@ export default function CategoriesPage() {
                   <div className='p-4'>
                     <h3 className='font-bold text-xl'>{category.name}</h3>
                     <p className='text-sm text-muted-foreground mt-1'>
-                      {category.description}
+                      {category.name}
                     </p>
                     <p className='text-sm mt-2'>
-                      {category.productCount} products
+                      {category.productQuantity} sản phẩm
                     </p>
                   </div>
                 </Link>
@@ -126,10 +85,10 @@ export default function CategoriesPage() {
             <div className='flex flex-col items-center justify-center space-y-4 text-center mb-10'>
               <div className='space-y-2'>
                 <h2 className='text-3xl font-bold tracking-tighter'>
-                  Featured Categories
+                  Danh mục nổi bật
                 </h2>
                 <p className='max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed'>
-                  Explore our most popular product categories
+                  Khám phá các danh mục sản phẩm phổ biến nhất của chúng tôi
                 </p>
               </div>
             </div>
@@ -142,7 +101,7 @@ export default function CategoriesPage() {
                 >
                   <div className='aspect-[4/3]'>
                     <Image
-                      src={category.image || '/placeholder.svg'}
+                      src={category.imageUrl || '/placeholder.svg'}
                       alt={category.name}
                       fill
                       className='object-cover transition-transform group-hover:scale-105'
@@ -152,9 +111,9 @@ export default function CategoriesPage() {
                         {category.name}
                       </h3>
                       <p className='text-white/80 mt-2'>
-                        {category.productCount} products
+                        {category.productQuantity} sản phẩm
                       </p>
-                      <Button className='mt-4'>Shop Now</Button>
+                      <Button className='mt-4'>Mua ngay</Button>
                     </div>
                   </div>
                 </Link>
@@ -169,20 +128,20 @@ export default function CategoriesPage() {
             <div className='flex flex-col items-center justify-center space-y-4 text-center'>
               <div className='space-y-2'>
                 <h2 className='text-3xl font-bold tracking-tighter'>
-                  Can't Find What You're Looking For?
+                  Không tìm thấy những gì bạn đang tìm kiếm?
                 </h2>
                 <p className='max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed'>
-                  Our customer service team is here to help you find the perfect
-                  product.
+                  Đội ngũ chăm sóc khách hàng của chúng tôi sẵn sàng giúp bạn
+                  tìm sản phẩm hoàn hảo.
                 </p>
               </div>
               <div className='flex flex-col gap-2 min-[400px]:flex-row'>
                 <Link href='/contact'>
-                  <Button size='lg'>Contact Us</Button>
+                  <Button size='lg'>Liên hệ với chúng tôi</Button>
                 </Link>
                 <Link href='/products'>
                   <Button size='lg' variant='outline'>
-                    View All Products
+                    Xem tất cả sản phẩm
                   </Button>
                 </Link>
               </div>

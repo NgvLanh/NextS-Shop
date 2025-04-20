@@ -6,8 +6,8 @@ import { ArrowRight, Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import Footer from '../../components/ui/footer';
-import Header from '../../components/ui/header';
+import Footer from '../../components/footer';
+import Header from '../../components/header';
 
 export default function CartPage() {
   // Mock cart data

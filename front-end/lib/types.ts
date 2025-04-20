@@ -29,6 +29,8 @@ export type ProductType = {
   imageUrl: string;
   category: CategoryType;
   variants: object;
+  createdAt: Date;
+  isFeatured?: boolean;
 };
 
 export type CategoryType = {
@@ -36,4 +38,5 @@ export type CategoryType = {
   name: string;
   slug: string;
   imageUrl: string;
+  productQuantity?: number;
 };

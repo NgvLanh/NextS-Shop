@@ -6,7 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Category } from './category.entity';
+import { Category } from '../../categories/entities/category.entity';
 import { ProductVariant } from './product-variant.entity';
 
 @Entity('products')
@@ -28,6 +28,9 @@ export class Product {
 
   @Column({ default: true, name: 'is_active' })
   isActive: boolean;
+
+  @Column({ name: 'created_at' })
+  createdAt: Date;
 
   @ManyToOne(() => Category, (category) => category.products)
   @JoinColumn({ name: 'category_id' })

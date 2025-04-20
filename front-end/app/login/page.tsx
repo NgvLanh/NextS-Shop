@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import Footer from '../../components/footer';
 import SignInSignUp from '../../components/form/sign-page';
-import Footer from '../../components/ui/footer';
 
 export default function LoginPage() {
   return (

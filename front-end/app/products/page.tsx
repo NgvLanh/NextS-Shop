@@ -1,3 +1,4 @@
+'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -8,68 +9,131 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { ChevronDown, Heart, ShoppingCart } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import Footer from '../../components/ui/footer';
-import Header from '../../components/ui/header';
+import { ChevronDown } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import CategoryCheckbox from '../../components/category-checkbox';
+import Footer from '../../components/footer';
+import Header from '../../components/header';
+import ProductCard from '../../components/product-card';
+import { CategoryType, ProductType } from '../../lib/types';
+import { ApiRequest, ApiResponse } from '../../services/apiRequest';
 
 export default function ProductsPage() {
-  // Mock products data
-  const products = Array.from({ length: 12 }, (_, i) => ({
-    id: i + 1,
-    name: `Product Name ${i + 1}`,
-    category: i % 2 === 0 ? 'Electronics' : 'Clothing',
-    price: 99.99,
-    image: `/placeholder.svg?height=400&width=400&text=Product+${i + 1}`,
-  }));
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [category, setCategory] = useState<CategoryType[]>([]);
+  const [allProducts, setAllProducts] = useState<ProductType[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<CategoryType[]>(
+    []
+  );
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const result = await ApiRequest<ApiResponse>('products', 'GET');
+      setAllProducts(result.data);
+      setProducts(result.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const result = await ApiRequest<ApiResponse>('categories', 'GET');
+      const all = {
+        id: 0,
+        name: 'Tất cả',
+      };
+      setCategory([all, ...result.data]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const filterProducts = (
+    categories: CategoryType[],
+    search: string,
+    sort: string
+  ) => {
+    setSelectedCategories(categories);
+    const categoryIds = categories.map((c) => c.id);
+    const shouldFetch = categoryIds.length === 0 || categoryIds.includes(0);
+
+    let filtered = allProducts;
+
+    if (!shouldFetch) {
+      filtered = filtered.filter((p) => categoryIds.includes(p.category.id));
+    }
+
+    if (search.trim() !== '') {
+      const lowerSearch = search.toLowerCase();
+      filtered = filtered.filter((p) =>
+        p.name.toLowerCase().includes(lowerSearch)
+      );
+    }
+
+    switch (sort) {
+      case 'price-low':
+        filtered = [...filtered].sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        filtered = [...filtered].sort((a, b) => b.price - a.price);
+        break;
+      case 'newest':
+        filtered = [...filtered].sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        break;
+      case 'feature':
+        filtered = [...filtered].sort(
+          (a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0)
+        );
+        break;
+    }
+
+    setProducts(filtered);
+  };
 
   return (
     <div className='flex flex-col min-h-screen'>
       <Header />
       <main className='flex-1'>
         <div className='container mx-auto py-8'>
-          <div className='flex flex-col md:flex-row gap-8'>
+          <div className='flex flex-col md:flex-row gap-8 mx-4 lg:mx-0'>
             {/* Filters Sidebar */}
             <div className='w-full md:w-1/4 space-y-6'>
               <div>
-                <h3 className='font-medium text-lg mb-4'>Categories</h3>
+                <h3 className='font-medium text-lg mb-4'>Danh mục</h3>
                 <div className='space-y-2'>
-                  {[
-                    'All',
-                    'Electronics',
-                    'Clothing',
-                    'Home & Kitchen',
-                    'Beauty',
-                  ].map((category) => (
-                    <div key={category} className='flex items-center'>
-                      <input
-                        type='checkbox'
-                        id={`category-${category}`}
-                        className='h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary'
-                      />
-                      <label
-                        htmlFor={`category-${category}`}
-                        className='ml-2 text-sm'
-                      >
-                        {category}
-                      </label>
-                    </div>
+                  {category.map((category) => (
+                    <CategoryCheckbox
+                      key={category.id}
+                      category={category}
+                      selectedCategories={selectedCategories}
+                      onChange={(categories) =>
+                        filterProducts(categories, '', '')
+                      }
+                    />
                   ))}
                 </div>
               </div>
               <div>
-                <h3 className='font-medium text-lg mb-4'>Price Range</h3>
+                <h3 className='font-medium text-lg mb-4'>Khoảng giá</h3>
                 <div className='space-y-4'>
                   <Slider defaultValue={[0, 1000]} max={1000} step={1} />
                   <div className='flex items-center justify-between'>
-                    <div className='text-sm'>$0</div>
-                    <div className='text-sm'>$1000</div>
+                    <div className='text-sm'>0₫</div>
+                    <div className='text-sm'>1.000₫</div>
                   </div>
                 </div>
               </div>
               <div>
-                <h3 className='font-medium text-lg mb-4'>Ratings</h3>
+                <h3 className='font-medium text-lg mb-4'>Đánh giá</h3>
                 <div className='space-y-2'>
                   {[5, 4, 3, 2, 1].map((rating) => (
                     <div key={rating} className='flex items-center'>
@@ -82,37 +146,41 @@ export default function ProductsPage() {
                         htmlFor={`rating-${rating}`}
                         className='ml-2 text-sm'
                       >
-                        {rating} Stars & Above
+                        {rating} Sao trở lên
                       </label>
                     </div>
                   ))}
                 </div>
               </div>
-              <Button className='w-full'>Apply Filters</Button>
+              <Button className='w-full'>Áp dụng bộ lọc</Button>
             </div>
 
             {/* Products Grid */}
             <div className='w-full md:w-3/4'>
               <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4'>
-                <h1 className='text-2xl font-bold'>All Products</h1>
+                <h1 className='text-2xl font-bold'>Tất cả sản phẩm</h1>
                 <div className='flex items-center gap-4 w-full sm:w-auto'>
                   <Input
-                    placeholder='Search products...'
+                    placeholder='Tìm kiếm sản phẩm...'
                     className='max-w-xs'
+                    onChange={(e) => filterProducts([], e.target.value, '')}
                   />
-                  <Select defaultValue='featured'>
+                  <Select
+                    defaultValue='featured'
+                    onValueChange={(e) => filterProducts([], '', e)}
+                  >
                     <SelectTrigger className='w-[180px]'>
-                      <SelectValue placeholder='Sort by' />
+                      <SelectValue placeholder='Sắp xếp theo' />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value='featured'>Featured</SelectItem>
+                      <SelectItem value='featured'>Nổi bật</SelectItem>
                       <SelectItem value='price-low'>
-                        Price: Low to High
+                        Giá: Thấp đến Cao
                       </SelectItem>
                       <SelectItem value='price-high'>
-                        Price: High to Low
+                        Giá: Cao đến Thấp
                       </SelectItem>
-                      <SelectItem value='newest'>Newest</SelectItem>
+                      <SelectItem value='newest'>Mới nhất</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -120,48 +188,7 @@ export default function ProductsPage() {
 
               <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
                 {products.map((product) => (
-                  <Link
-                    href={`/products/${product.id}`}
-                    key={product.id}
-                    className='group'
-                  >
-                    <div className='overflow-hidden rounded-lg border bg-background'>
-                      <div className='relative aspect-square overflow-hidden'>
-                        <Image
-                          src={product.image || '/placeholder.svg'}
-                          alt={product.name}
-                          width={400}
-                          height={400}
-                          className='object-cover transition-transform group-hover:scale-105'
-                        />
-                        <div className='absolute top-2 right-2'>
-                          <Button
-                            size='icon'
-                            variant='ghost'
-                            className='h-8 w-8 rounded-full bg-white'
-                          >
-                            <Heart className='h-4 w-4' />
-                            <span className='sr-only'>Add to wishlist</span>
-                          </Button>
-                        </div>
-                      </div>
-                      <div className='p-4'>
-                        <h3 className='font-medium'>{product.name}</h3>
-                        <p className='text-sm text-muted-foreground'>
-                          {product.category}
-                        </p>
-                        <div className='mt-2 flex items-center justify-between'>
-                          <span className='font-medium'>
-                            ${product.price.toFixed(2)}
-                          </span>
-                          <Button size='sm' variant='secondary'>
-                            <ShoppingCart className='mr-2 h-4 w-4' />
-                            Add to Cart
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </div>
 
