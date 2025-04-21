@@ -51,7 +51,7 @@ export default function Categories() {
             >
               {categories.map((category) => (
                 <SwiperSlide key={category.id}>
-                  <Link href={`#`} className='group'>
+                  <Link href={`/categories`} className='group'>
                     <div className='relative overflow-hidden rounded-lg'>
                       <div className='aspect-square'>
                         <Image

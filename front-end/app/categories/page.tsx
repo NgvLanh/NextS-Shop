@@ -51,7 +51,7 @@ export default function CategoriesPage() {
             <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
               {categories.map((category) => (
                 <Link
-                  href={`/categories/${category.id}`}
+                  href={`#`}
                   key={category.id}
                   className='group overflow-hidden rounded-lg border bg-background transition-colors hover:bg-accent/50'
                 >
@@ -95,7 +95,7 @@ export default function CategoriesPage() {
             <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
               {categories.slice(0, 3).map((category) => (
                 <Link
-                  href={`/categories/${category.id}`}
+                  href={`/products`}
                   key={category.id}
                   className='group relative overflow-hidden rounded-lg'
                 >

@@ -1,6 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+
 import {
   Select,
   SelectContent,
@@ -9,11 +10,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import CategoryCheckbox from '../../components/category-checkbox';
 import Footer from '../../components/footer';
 import Header from '../../components/header';
+import PaginationCustom from '../../components/pagination-custom';
 import ProductCard from '../../components/product-card';
 import { CategoryType, ProductType } from '../../lib/types';
 import { ApiRequest, ApiResponse } from '../../services/apiRequest';
@@ -25,6 +26,8 @@ export default function ProductsPage() {
   const [selectedCategories, setSelectedCategories] = useState<CategoryType[]>(
     []
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 16;
 
   useEffect(() => {
     fetchProducts();
@@ -59,6 +62,7 @@ export default function ProductsPage() {
     search: string,
     sort: string
   ) => {
+    setCurrentPage(1);
     setSelectedCategories(categories);
     const categoryIds = categories.map((c) => c.id);
     const shouldFetch = categoryIds.length === 0 || categoryIds.includes(0);
@@ -99,6 +103,11 @@ export default function ProductsPage() {
     setProducts(filtered);
   };
 
+  const paginatedProducts = products.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   return (
     <div className='flex flex-col min-h-screen'>
       <Header />
@@ -106,7 +115,7 @@ export default function ProductsPage() {
         <div className='container mx-auto py-8'>
           <div className='flex flex-col md:flex-row gap-8 mx-4 lg:mx-0'>
             {/* Filters Sidebar */}
-            <div className='w-full md:w-1/4 space-y-6'>
+            <div className='w-full md:w-1/5 space-y-6'>
               <div>
                 <h3 className='font-medium text-lg mb-4'>Danh mục</h3>
                 <div className='space-y-2'>
@@ -156,7 +165,7 @@ export default function ProductsPage() {
             </div>
 
             {/* Products Grid */}
-            <div className='w-full md:w-3/4'>
+            <div className='w-full md:w-4/5'>
               <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4'>
                 <h1 className='text-2xl font-bold'>Tất cả sản phẩm</h1>
                 <div className='flex items-center gap-4 w-full sm:w-auto'>
@@ -186,34 +195,19 @@ export default function ProductsPage() {
                 </div>
               </div>
 
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-                {products.map((product) => (
+              <div className='grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6'>
+                {paginatedProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
 
               <div className='flex justify-center mt-10'>
-                <div className='flex items-center gap-2'>
-                  <Button variant='outline' size='icon' disabled>
-                    <ChevronDown className='h-4 w-4 rotate-90' />
-                  </Button>
-                  <Button variant='outline' size='sm' className='h-8 w-8'>
-                    1
-                  </Button>
-                  <Button variant='outline' size='sm' className='h-8 w-8'>
-                    2
-                  </Button>
-                  <Button variant='outline' size='sm' className='h-8 w-8'>
-                    3
-                  </Button>
-                  <span>...</span>
-                  <Button variant='outline' size='sm' className='h-8 w-8'>
-                    10
-                  </Button>
-                  <Button variant='outline' size='icon'>
-                    <ChevronDown className='h-4 w-4 -rotate-90' />
-                  </Button>
-                </div>
+                <PaginationCustom
+                  data={products}
+                  pageSize={pageSize}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                />
               </div>
             </div>
           </div>

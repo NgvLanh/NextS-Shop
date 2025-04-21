@@ -3,9 +3,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Product } from './product.entity';
+import { VariantAttribute } from './variant_attribute.entity';
 
 @Entity('product_variants')
 export class ProductVariant {
@@ -19,7 +21,7 @@ export class ProductVariant {
   price: number;
 
   @Column({ default: 0 })
-  inventory: number;
+  stock: number;
 
   @Column({ name: 'image_url' })
   imageUrl: string;
@@ -27,4 +29,10 @@ export class ProductVariant {
   @ManyToOne(() => Product, (product) => product.variants)
   @JoinColumn({ name: 'product_id' })
   product: Product;
+
+  @OneToMany(
+    () => VariantAttribute,
+    (variantAttribute) => variantAttribute.variant,
+  )
+  variantAttributes: VariantAttribute[];
 }
