@@ -9,8 +9,12 @@ export default function Header() {
 
   useEffect(() => {
     const verify = async () => {
-      const result = await verifyToken();
-      setIsAuth(result.success || false);
+      const token =
+        localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (token) {
+        const result = await verifyToken();
+        setIsAuth(result.success || false);
+      }
     };
     verify();
   }, []);

@@ -3,10 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApiResponse } from '../../configs/api-response';
 import { Category } from '../categories/entities/category.entity';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductAttributeOption } from './entities/product-attribute-option.entity';
+import { ProductAttribute } from './entities/product-attribute.entity';
 import { ProductVariant } from './entities/product-variant.entity';
 import { Product } from './entities/product.entity';
+import { VariantAttribute } from './entities/variant_attribute.entity';
 
 @Injectable()
 export class ProductsService {
@@ -17,11 +18,13 @@ export class ProductsService {
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(ProductVariant)
     private readonly variantRepository: Repository<ProductVariant>,
+    @InjectRepository(ProductAttribute)
+    private readonly attributeRepository: Repository<ProductAttribute>,
+    @InjectRepository(ProductAttributeOption)
+    private readonly optionRepository: Repository<ProductAttributeOption>,
+    @InjectRepository(VariantAttribute)
+    private readonly variantAttributeRepository: Repository<VariantAttribute>,
   ) {}
-
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
-  }
 
   async findAll() {
     const products = await this.productRepository.find({
@@ -54,15 +57,71 @@ export class ProductsService {
     return ApiResponse.success('Lấy danh sách sản phẩm thành công!', data);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
-  }
+  async findOne(id: number) {
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: {
+        variants: {
+          variantAttributes: {
+            option: {
+              attribute: true,
+            },
+          },
+        },
+        category: true,
+      },
+    });
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
-  }
+    if (!product) {
+      return ApiResponse.error('Không tìm thấy sản phẩm!');
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+    const attributesMap = {};
+    const images = [];
+    const cleanVariants = product.variants.map((variant) => {
+      const attrs = {};
+      variant.variantAttributes.forEach((attr) => {
+        const attrName = attr.option.attribute.name;
+        const attrValue = attr.option.value;
+
+        if (!attributesMap[attrName]) attributesMap[attrName] = new Set();
+        attributesMap[attrName].add(attrValue);
+
+        attrs[attrName] = {
+          value: attr.option.value,
+          ...(attr.option.hexColor ? { hexColor: attr.option.hexColor } : {}),
+        };
+      });
+      images.push(variant.imageUrl);
+      return {
+        id: variant.id,
+        sku: variant.sku,
+        price: Number(variant.price),
+        inventory: variant.inventory,
+        attributes: attrs,
+      };
+    });
+
+    const attributes = {};
+    for (const key in attributesMap) {
+      attributes[key] = Array.from(attributesMap[key]);
+    }
+
+    const result = {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      description: product.description,
+      basePrice: Number(product.basePrice),
+      images,
+      category: {
+        id: product.category.id,
+        name: product.category.name,
+      },
+      variants: cleanVariants,
+      attributes,
+    };
+
+    return ApiResponse.success('Lấy sản phẩm thành công!', result);
   }
 }

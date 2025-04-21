@@ -27,10 +27,12 @@ export type ProductType = {
   basePrice: number;
   price: number;
   imageUrl: string;
+  images: string[];
   category: CategoryType;
   variants: object;
   createdAt: Date;
   isFeatured?: boolean;
+  attributes?: any;
 };
 
 export type CategoryType = {

@@ -1,7 +1,5 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Heart,
   Minus,
@@ -14,49 +12,68 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Footer from '../../../components/footer';
 import Header from '../../../components/header';
+import { Button } from '../../../components/ui/button';
+import { ProductType } from '../../../lib/types';
+import { ApiRequest, ApiResponse } from '../../../services/apiRequest';
 
-export default function ProductDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function ProductDetailPage() {
+  const params = useParams();
+
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [product, setProduct] = useState<ProductType>({} as ProductType);
 
-  // Mock product data
-  const product = {
-    id: params.id,
-    name: `Product Name ${params.id}`,
-    description:
-      'This is a detailed description of the product. It includes information about the materials, features, and benefits of the product. The description is designed to help customers make an informed purchasing decision.',
-    price: 99.99,
-    discount: 129.99,
-    rating: 4.5,
-    reviews: 128,
-    stock: 10,
-    images: [
-      `/placeholder.svg?height=600&width=600&text=Product+${params.id}`,
-      `/placeholder.svg?height=600&width=600&text=Product+${params.id}+View+2`,
-      `/placeholder.svg?height=600&width=600&text=Product+${params.id}+View+3`,
-      `/placeholder.svg?height=600&width=600&text=Product+${params.id}+View+4`,
-    ],
-    colors: ['Red', 'Blue', 'Black'],
-    sizes: ['S', 'M', 'L', 'XL'],
+  useEffect(() => {
+    fetchProductById(params.id ?? '');
+  }, []);
+
+  const fetchProductById = async (productId: string | string[]) => {
+    try {
+      const result = await ApiRequest<ApiResponse>(
+        `products/${productId}`,
+        'GET'
+      );
+      setProduct(result.data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
+  // Mock product data
+  // const product = {
+  //   id: params.id,
+  //   name: `Product Name ${params.id}`,
+  //   description:
+  //     'This is a detailed description of the product. It includes information about the materials, features, and benefits of the product. The description is designed to help customers make an informed purchasing decision.',
+  //   price: 99.99,
+  //   discount: 129.99,
+  //   rating: 4.5,
+  //   reviews: 128,
+  //   stock: 10,
+  //   images: [
+  //     `/placeholder.svg?height=600&width=600&text=Product+${params.id}`,
+  //     `/placeholder.svg?height=600&width=600&text=Product+${params.id}+View+2`,
+  //     `/placeholder.svg?height=600&width=600&text=Product+${params.id}+View+3`,
+  //     `/placeholder.svg?height=600&width=600&text=Product+${params.id}+View+4`,
+  //   ],
+  //   colors: ['Red', 'Blue', 'Black'],
+  //   sizes: ['S', 'M', 'L', 'XL'],
+  // };
+
   const incrementQuantity = () => {
-    if (quantity < product.stock) {
-      setQuantity(quantity + 1);
-    }
+    // if (quantity < product.stock) {
+    //   setQuantity(quantity + 1);
+    // }
   };
 
   const decrementQuantity = () => {
-    if (quantity > 1) {
-      setQuantity(quantity - 1);
-    }
+    // if (quantity > 1) {
+    //   setQuantity(quantity - 1);
+    // }
   };
 
   return (
@@ -70,14 +87,14 @@ export default function ProductDetailPage({
               href='/'
               className='text-muted-foreground hover:text-foreground'
             >
-              Home
+              Trang chủ
             </Link>
             <span className='text-muted-foreground'>/</span>
             <Link
               href='/products'
               className='text-muted-foreground hover:text-foreground'
             >
-              Products
+              Sản phẩm
             </Link>
             <span className='text-muted-foreground'>/</span>
             <span>{product.name}</span>
@@ -88,15 +105,15 @@ export default function ProductDetailPage({
             <div className='space-y-4'>
               <div className='overflow-hidden rounded-lg border'>
                 <Image
-                  src={product.images[selectedImage] || '/placeholder.svg'}
-                  alt={product.name}
+                  src={product.images?.[selectedImage] || '/placeholder.svg'}
+                  alt={''}
                   width={600}
                   height={600}
                   className='object-cover w-full aspect-square'
                 />
               </div>
               <div className='flex gap-2 overflow-auto pb-2'>
-                {product.images.map((image, index) => (
+                {product.images?.map((image, index) => (
                   <button
                     key={index}
                     className={`relative overflow-hidden rounded border ${
@@ -126,9 +143,9 @@ export default function ProductDetailPage({
                       <Star
                         key={i}
                         className={`h-4 w-4 ${
-                          i < Math.floor(product.rating)
+                          i < Math.floor(1)
                             ? 'text-yellow-400 fill-yellow-400'
-                            : i < product.rating
+                            : i < 5
                             ? 'text-yellow-400 fill-yellow-400 opacity-50'
                             : 'text-gray-300'
                         }`}
@@ -136,16 +153,14 @@ export default function ProductDetailPage({
                     ))}
                   </div>
                   <span className='text-sm text-muted-foreground'>
-                    {product.rating} ({product.reviews} reviews)
+                    {5} ({0} reviews)
                   </span>
                 </div>
               </div>
 
               <div className='flex items-baseline gap-2'>
-                <span className='text-2xl font-bold'>
-                  ${product.price.toFixed(2)}
-                </span>
-                {product.discount && (
+                <span className='text-2xl font-bold'>${product.price}</span>
+                {/* {product.discount && (
                   <span className='text-lg text-muted-foreground line-through'>
                     ${product.discount.toFixed(2)}
                   </span>
@@ -154,7 +169,7 @@ export default function ProductDetailPage({
                   <span className='text-sm font-medium text-green-600'>
                     Save ${(product.discount - product.price).toFixed(2)}
                   </span>
-                )}
+                )} */}
               </div>
 
               <p className='text-muted-foreground'>{product.description}</p>
@@ -163,7 +178,7 @@ export default function ProductDetailPage({
                 <div>
                   <h3 className='font-medium mb-2'>Color</h3>
                   <div className='flex gap-2'>
-                    {product.colors.map((color) => (
+                    {product.attributes?.Color.map((color) => (
                       <button
                         key={color}
                         className='border rounded-md px-3 py-1 text-sm hover:border-primary'
@@ -177,7 +192,7 @@ export default function ProductDetailPage({
                 <div>
                   <h3 className='font-medium mb-2'>Size</h3>
                   <div className='flex gap-2'>
-                    {product.sizes.map((size) => (
+                    {product.attributes?.Size.map((size) => (
                       <button
                         key={size}
                         className='border rounded-md px-3 py-1 text-sm hover:border-primary'
@@ -204,12 +219,12 @@ export default function ProductDetailPage({
                       variant='outline'
                       size='icon'
                       onClick={incrementQuantity}
-                      disabled={quantity >= product.stock}
+                      disabled={quantity >= product.inventory}
                     >
                       <Plus className='h-4 w-4' />
                     </Button>
                     <span className='ml-4 text-sm text-muted-foreground'>
-                      {product.stock} available
+                      {product.inventory} available
                     </span>
                   </div>
                 </div>
@@ -245,7 +260,7 @@ export default function ProductDetailPage({
 
           {/* Product Details Tabs */}
           <div className='mt-16'>
-            <Tabs defaultValue='description'>
+            {/* <Tabs defaultValue='description'>
               <TabsList className='w-full justify-start border-b rounded-none'>
                 <TabsTrigger value='description'>Description</TabsTrigger>
                 <TabsTrigger value='specifications'>Specifications</TabsTrigger>
@@ -368,12 +383,12 @@ export default function ProductDetailPage({
                   </div>
                 </div>
               </TabsContent>
-            </Tabs>
+            </Tabs> */}
           </div>
 
           {/* Related Products */}
           <div className='mt-16'>
-            <h2 className='text-2xl font-bold mb-6'>You May Also Like</h2>
+            {/* <h2 className='text-2xl font-bold mb-6'>You May Also Like</h2>
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
               {Array.from({ length: 4 }).map((_, i) => (
                 <Link
@@ -417,7 +432,7 @@ export default function ProductDetailPage({
                   </div>
                 </Link>
               ))}
-            </div>
+            </div> */}
           </div>
         </div>
       </main>
