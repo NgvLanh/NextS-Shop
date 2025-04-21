@@ -1,23 +1,14 @@
 'use client';
 
-import {
-  Heart,
-  Minus,
-  Plus,
-  RotateCcw,
-  ShieldCheck,
-  ShoppingCart,
-  Star,
-  Truck,
-} from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import CartBreakcrumbs from '../../../components/cart-breadcrumbs';
 import Footer from '../../../components/footer';
 import Header from '../../../components/header';
-import { Button } from '../../../components/ui/button';
-import { ProductType } from '../../../lib/types';
+import ProductImages from '../../../components/product-images';
+import ProductInfo from '../../../components/product-info';
+import { toast } from '../../../hooks/use-toast';
+import { ProductType, VariantType } from '../../../lib/types';
 import { ApiRequest, ApiResponse } from '../../../services/apiRequest';
 
 export default function ProductDetailPage() {
@@ -26,6 +17,12 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [product, setProduct] = useState<ProductType>({} as ProductType);
+  const [attributes, setAttributes] = useState<object>({});
+  const [variants, setVariants] = useState<VariantType[]>();
+  const [variant, setVariant] = useState<VariantType>({} as VariantType);
+  const [selectedAttributes, setSelectedAttributes] = useState<{
+    [key: string]: string;
+  }>({});
 
   useEffect(() => {
     fetchProductById(params.id ?? '');
@@ -38,42 +35,47 @@ export default function ProductDetailPage() {
         'GET'
       );
       setProduct(result.data);
+      setAttributes(result.data?.attributes);
+      setVariants(result.data?.variants);
     } catch (error) {
       console.log(error);
     }
   };
 
-  // Mock product data
-  // const product = {
-  //   id: params.id,
-  //   name: `Product Name ${params.id}`,
-  //   description:
-  //     'This is a detailed description of the product. It includes information about the materials, features, and benefits of the product. The description is designed to help customers make an informed purchasing decision.',
-  //   price: 99.99,
-  //   discount: 129.99,
-  //   rating: 4.5,
-  //   reviews: 128,
-  //   stock: 10,
-  //   images: [
-  //     `/placeholder.svg?height=600&width=600&text=Product+${params.id}`,
-  //     `/placeholder.svg?height=600&width=600&text=Product+${params.id}+View+2`,
-  //     `/placeholder.svg?height=600&width=600&text=Product+${params.id}+View+3`,
-  //     `/placeholder.svg?height=600&width=600&text=Product+${params.id}+View+4`,
-  //   ],
-  //   colors: ['Red', 'Blue', 'Black'],
-  //   sizes: ['S', 'M', 'L', 'XL'],
-  // };
+  const handleSelectProduct = (key: string, value: string) => {
+    const updated = { ...selectedAttributes, [key]: value };
+    setSelectedAttributes(updated);
+
+    const matched = variants?.find((variant) => {
+      return Object.entries(updated).every(([attrKey, attrValue]) => {
+        return variant.attributes[attrKey] === attrValue;
+      });
+    });
+
+    setVariant(matched ?? ({} as VariantType));
+  };
 
   const incrementQuantity = () => {
-    // if (quantity < product.stock) {
-    //   setQuantity(quantity + 1);
-    // }
+    if (quantity < variant.stock) {
+      setQuantity(quantity + 1);
+    }
   };
 
   const decrementQuantity = () => {
-    // if (quantity > 1) {
-    //   setQuantity(quantity - 1);
-    // }
+    if (quantity > 1) {
+      setQuantity(quantity - 1);
+    }
+  };
+
+  const handleAddToCart = (variant: VariantType, quantity: number) => {
+    console.log(variant, quantity);
+  };
+
+  const handleAddToWishlist = (variant: VariantType) => {
+    toast({
+      title: 'Đang phát triển',
+      description: 'Chức đăng phát triển sau ...!',
+    });
   };
 
   return (
@@ -82,180 +84,22 @@ export default function ProductDetailPage() {
       <main className='flex-1'>
         <div className='container mx-auto py-8'>
           {/* Breadcrumbs */}
-          <div className='flex items-center gap-1 text-sm mb-6'>
-            <Link
-              href='/'
-              className='text-muted-foreground hover:text-foreground'
-            >
-              Trang chủ
-            </Link>
-            <span className='text-muted-foreground'>/</span>
-            <Link
-              href='/products'
-              className='text-muted-foreground hover:text-foreground'
-            >
-              Sản phẩm
-            </Link>
-            <span className='text-muted-foreground'>/</span>
-            <span>{product.name}</span>
-          </div>
+          <CartBreakcrumbs product={product} />
 
           <div className='grid md:grid-cols-2 gap-8 lg:gap-16'>
             {/* Product Images */}
-            <div className='space-y-4'>
-              <div className='overflow-hidden rounded-lg border'>
-                <Image
-                  src={product.images?.[selectedImage] || '/placeholder.svg'}
-                  alt={''}
-                  width={600}
-                  height={600}
-                  className='object-cover w-full aspect-square'
-                />
-              </div>
-              <div className='flex gap-2 overflow-auto pb-2'>
-                {product.images?.map((image, index) => (
-                  <button
-                    key={index}
-                    className={`relative overflow-hidden rounded border ${
-                      selectedImage === index ? 'ring-2 ring-primary' : ''
-                    }`}
-                    onClick={() => setSelectedImage(index)}
-                  >
-                    <Image
-                      src={image || '/placeholder.svg'}
-                      alt={`${product.name} view ${index + 1}`}
-                      width={100}
-                      height={100}
-                      className='object-cover w-20 h-20'
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
+            <ProductImages
+              product={product}
+              selectedImage={selectedImage}
+              setSelectedImage={setSelectedImage}
+            />
 
             {/* Product Info */}
-            <div className='space-y-6'>
-              <div>
-                <h1 className='text-3xl font-bold'>{product.name}</h1>
-                <div className='flex items-center gap-2 mt-2'>
-                  <div className='flex items-center'>
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < Math.floor(1)
-                            ? 'text-yellow-400 fill-yellow-400'
-                            : i < 5
-                            ? 'text-yellow-400 fill-yellow-400 opacity-50'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className='text-sm text-muted-foreground'>
-                    {5} ({0} reviews)
-                  </span>
-                </div>
-              </div>
-
-              <div className='flex items-baseline gap-2'>
-                <span className='text-2xl font-bold'>${product.price}</span>
-                {/* {product.discount && (
-                  <span className='text-lg text-muted-foreground line-through'>
-                    ${product.discount.toFixed(2)}
-                  </span>
-                )}
-                {product.discount && (
-                  <span className='text-sm font-medium text-green-600'>
-                    Save ${(product.discount - product.price).toFixed(2)}
-                  </span>
-                )} */}
-              </div>
-
-              <p className='text-muted-foreground'>{product.description}</p>
-
-              <div className='space-y-4'>
-                <div>
-                  <h3 className='font-medium mb-2'>Color</h3>
-                  <div className='flex gap-2'>
-                    {product.attributes?.Color.map((color) => (
-                      <button
-                        key={color}
-                        className='border rounded-md px-3 py-1 text-sm hover:border-primary'
-                      >
-                        {color}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className='font-medium mb-2'>Size</h3>
-                  <div className='flex gap-2'>
-                    {product.attributes?.Size.map((size) => (
-                      <button
-                        key={size}
-                        className='border rounded-md px-3 py-1 text-sm hover:border-primary'
-                      >
-                        {size}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className='font-medium mb-2'>Quantity</h3>
-                  <div className='flex items-center'>
-                    <Button
-                      variant='outline'
-                      size='icon'
-                      onClick={decrementQuantity}
-                      disabled={quantity <= 1}
-                    >
-                      <Minus className='h-4 w-4' />
-                    </Button>
-                    <span className='w-12 text-center'>{quantity}</span>
-                    <Button
-                      variant='outline'
-                      size='icon'
-                      onClick={incrementQuantity}
-                      disabled={quantity >= product.inventory}
-                    >
-                      <Plus className='h-4 w-4' />
-                    </Button>
-                    <span className='ml-4 text-sm text-muted-foreground'>
-                      {product.inventory} available
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className='flex flex-col sm:flex-row gap-4'>
-                <Button className='flex-1' size='lg'>
-                  <ShoppingCart className='mr-2 h-5 w-5' />
-                  Add to Cart
-                </Button>
-                <Button variant='outline' size='lg'>
-                  <Heart className='mr-2 h-5 w-5' />
-                  Add to Wishlist
-                </Button>
-              </div>
-
-              <div className='grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t'>
-                <div className='flex items-center gap-2'>
-                  <Truck className='h-5 w-5 text-muted-foreground' />
-                  <span className='text-sm'>Free shipping over $50</span>
-                </div>
-                <div className='flex items-center gap-2'>
-                  <RotateCcw className='h-5 w-5 text-muted-foreground' />
-                  <span className='text-sm'>30-day returns</span>
-                </div>
-                <div className='flex items-center gap-2'>
-                  <ShieldCheck className='h-5 w-5 text-muted-foreground' />
-                  <span className='text-sm'>2-year warranty</span>
-                </div>
-              </div>
-            </div>
+            <ProductInfo
+              product={product}
+              attributes={attributes}
+              variants={variants}
+            />
           </div>
 
           {/* Product Details Tabs */}

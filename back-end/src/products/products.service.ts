@@ -78,26 +78,24 @@ export class ProductsService {
 
     const attributesMap = {};
     const images = [];
+
     const cleanVariants = product.variants.map((variant) => {
       const attrs = {};
       variant.variantAttributes.forEach((attr) => {
-        const attrName = attr.option.attribute.name;
+        const attrName = attr.option.attribute.name.toLowerCase();
         const attrValue = attr.option.value;
 
         if (!attributesMap[attrName]) attributesMap[attrName] = new Set();
         attributesMap[attrName].add(attrValue);
-
-        attrs[attrName] = {
-          value: attr.option.value,
-          ...(attr.option.hexColor ? { hexColor: attr.option.hexColor } : {}),
-        };
+        attrs[attrName] = attrValue;
       });
-      images.push(variant.imageUrl);
+
+      if (variant.imageUrl) images.push(variant.imageUrl);
       return {
         id: variant.id,
         sku: variant.sku,
         price: Number(variant.price),
-        inventory: variant.inventory,
+        stock: variant.stock,
         attributes: attrs,
       };
     });
@@ -120,6 +118,7 @@ export class ProductsService {
       },
       variants: cleanVariants,
       attributes,
+      discount: null,
     };
 
     return ApiResponse.success('Lấy sản phẩm thành công!', result);

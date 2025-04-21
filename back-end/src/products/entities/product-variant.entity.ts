@@ -21,7 +21,7 @@ export class ProductVariant {
   price: number;
 
   @Column({ default: 0 })
-  inventory: number;
+  stock: number;
 
   @Column({ name: 'image_url' })
   imageUrl: string;

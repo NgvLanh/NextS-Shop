@@ -25,14 +25,16 @@ export type ProductType = {
   slug: string;
   description: string;
   basePrice: number;
-  price: number;
   imageUrl: string;
   images: string[];
+  stock: number;
   category: CategoryType;
-  variants: object;
+  variants: object[];
   createdAt: Date;
   isFeatured?: boolean;
   attributes?: any;
+  discount?: any;
+  rate?: number;
 };
 
 export type CategoryType = {
@@ -41,4 +43,12 @@ export type CategoryType = {
   slug: string;
   imageUrl: string;
   productQuantity?: number;
+};
+
+export type VariantType = {
+  id: number;
+  sku: string;
+  price: number;
+  stock: number;
+  attributes: any;
 };
