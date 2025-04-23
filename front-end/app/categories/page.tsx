@@ -17,7 +17,7 @@ export default function CategoriesPage() {
         const result = await ApiRequest<ApiResponse>('categories', 'GET');
         setCategories(result.data || []);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     };
     fetchCategories();

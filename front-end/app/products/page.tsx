@@ -40,7 +40,7 @@ export default function ProductsPage() {
       setAllProducts(result.data);
       setProducts(result.data);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -53,7 +53,7 @@ export default function ProductsPage() {
       };
       setCategory([all, ...result.data]);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 

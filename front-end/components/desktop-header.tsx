@@ -1,8 +1,34 @@
+'use client';
+
+import { useCart } from '@/contexts/CartContext';
 import { Heart, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { ApiRequest, ApiResponse } from '../services/apiRequest';
+import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 
 export default function DesktopHeader(auth: { auth: boolean }) {
+  const { cartItems, setCartItems } = useCart();
+
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
+  const fetchCart = async () => {
+    try {
+      const result = await ApiRequest<ApiResponse>('carts', 'GET');
+      setCartItems(result.data.cartItems);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const cartItemCount = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
+
   return (
     <div className='hidden md:flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
@@ -36,8 +62,11 @@ export default function DesktopHeader(auth: { auth: boolean }) {
         <Link href='/search'>
           <Heart className='h-5 w-5' />
         </Link>
-        <Link href='/cart' className='relative'>
+        <Link href='/cart' className='relative mr-2'>
           <ShoppingCart className='h-5 w-5' />
+          <Badge className='absolute -top-2 -right-4 scale-75'>
+            {cartItemCount}
+          </Badge>
         </Link>
         <Link href={auth.auth ? '/account' : '/login'}>
           <Button variant='outline' size='sm'>

@@ -4,9 +4,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Cart } from '../../carts/entities/cart.entity';
 import { Role } from '../../roles/entities/role.entity';
 
 @Entity('users')
@@ -44,4 +46,7 @@ export class User {
   @ManyToOne(() => Role, (role) => role.users)
   @JoinColumn({ name: 'role_id' })
   role: Role;
+
+  @OneToOne(() => Cart, (cart) => cart.user)
+  cart: Cart;
 }

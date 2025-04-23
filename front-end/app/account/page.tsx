@@ -14,39 +14,25 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 import Footer from '../../components/footer';
 import AccountForm from '../../components/form/account';
 import AvatarForm from '../../components/form/avatar';
 import ChangePasswordForm from '../../components/form/change-password';
 import Header from '../../components/header';
+import { useUser } from '../../contexts/UserContext';
 import { toast } from '../../hooks/use-toast';
 import { UserType } from '../../lib/types';
 import { ApiRequest, ApiResponse } from '../../services/apiRequest';
-import { verifyToken } from '../../services/authService';
 
 export default function AccountPage() {
   const router = useRouter();
-  const [profile, setProfile] = useState<UserType | null>(null);
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    try {
-      const result = await verifyToken();
-      setProfile(result.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const { user, setUser } = useUser();
 
   const handleupdateProfile = async (data: UserType | null | FieldValues) => {
     try {
       const result = await ApiRequest<ApiResponse>(`auth/profile`, 'PUT', data);
-      setProfile(result.data);
+      setUser(result.data);
       toast({
         title: 'Thành công',
         description: 'Cập nhật thông tin thành công!',
@@ -57,7 +43,7 @@ export default function AccountPage() {
         description: 'Cập nhật thông tin Thất bại!',
         variant: 'destructive',
       });
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -70,7 +56,7 @@ export default function AccountPage() {
       const result = await ApiRequest<ApiResponse>(`auth/avatar`, 'PUT', {
         avatarUrl: imageUrl,
       });
-      setProfile(result.data);
+      setUser(result.data);
       toast({
         title: 'Thành công',
         description: 'Cập nhật avatar thành công!',
@@ -81,7 +67,7 @@ export default function AccountPage() {
         description: 'Cập nhật avatar Thất bại!',
         variant: 'destructive',
       });
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -143,12 +129,10 @@ export default function AccountPage() {
             <div className='md:col-span-1'>
               <div className='border rounded-lg overflow-hidden'>
                 <div className='bg-muted p-6 flex flex-col items-center'>
-                  <AvatarForm user={profile} onSubmit={handleupdateAvatar} />
-                  <h2 className='font-bold text-lg'>
-                    {profile && profile.fullName}
-                  </h2>
+                  <AvatarForm user={user} onSubmit={handleupdateAvatar} />
+                  <h2 className='font-bold text-lg'>{user && user.fullName}</h2>
                   <p className='text-sm text-muted-foreground'>
-                    {profile && profile.email}
+                    {user && user.email}
                   </p>
                 </div>
                 <div className='p-4'>
@@ -206,8 +190,8 @@ export default function AccountPage() {
             <div className='md:col-span-3'>
               <Tabs defaultValue='profile'>
                 <TabsContent value='profile' className='space-y-6'>
-                  <AccountForm data={profile} onSubmit={handleupdateProfile} />
-                  <ChangePasswordForm user={profile} />
+                  <AccountForm data={user} onSubmit={handleupdateProfile} />
+                  <ChangePasswordForm user={user} />
                 </TabsContent>
 
                 <TabsContent value='orders' className='space-y-6'>

@@ -7,10 +7,12 @@ import {
   ShoppingCart,
   Truck,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from '../hooks/use-toast';
 import { ProductType, VariantType } from '../lib/types';
 import { formatCurrencyVND } from '../lib/utils';
+import { ApiRequest, ApiResponse } from '../services/apiRequest';
 import CartRate from './cart-rate';
 import { Button } from './ui/button';
 
@@ -28,6 +30,8 @@ export default function ProductInfo({
   const [selectedAttributes, setSelectedAttributes] = useState<{
     [key: string]: string;
   }>({});
+
+  const router = useRouter();
 
   const handleSelectProduct = (key: string, value: string) => {
     const updated = { ...selectedAttributes, [key]: value };
@@ -57,40 +61,67 @@ export default function ProductInfo({
   const handleAddToCart = (variant: VariantType, quantity: number) => {
     const isLogin =
       localStorage.getItem('token') || sessionStorage.getItem('token') || false;
-    if (!isLogin) {
-      addToCartLocal(variant, quantity);
-    }
-    toast({
-      title: 'Thêm thành công',
-      description: `Đã thêm ${product.name} vào giỏ hàng!`,
-    });
-  };
-
-  const addToCartLocal = (variant: VariantType, quantity: number) => {
-    const data = {
-      id: variant.id,
-      sku: variant.sku,
-      price: variant.price,
-      quantity,
-    };
-    const cartExits = localStorage.getItem('cart');
-    const cart = cartExits ? JSON.parse(cartExits) : [];
-
-    const index = cart.findIndex((item: any) => item.id === data.id);
-    if (cart[index].quantity >= variant.stock || quantity >= variant.stock) {
+    if (isLogin) {
+      addToCartServer(variant, quantity);
+    } else {
+      // addToCartLocal(variant, quantity);
       toast({
-        title: 'Vuợt số lượng',
-        description: `Đã thêm ${product.name} vào giỏ hàng!`,
+        title: 'Vui lòng đăng nhập',
+        description: `Vui lòng đăng nhập để tiếp tục thêm vào giỏ hàng!`,
         variant: 'destructive',
       });
-      return;
+      router.push('/login');
     }
-    if (index !== -1) {
-      cart[index].quantity += data.quantity;
-    } else {
-      cart.push(data);
+  };
+  const addToCartServer = async (variant: VariantType, quantity: number) => {
+    try {
+      const result = await ApiRequest<ApiResponse>(`carts`, 'POST', {
+        productId: variant.id,
+        quantity,
+      });
+      if (result.success) {
+        toast({
+          title: 'Thành công',
+          description: `Đã thêm ${quantity} ${product.name} vào giỏ hàng!`,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Thất bại',
+        description: error?.message,
+        variant: 'destructive',
+      });
     }
-    localStorage.setItem('cart', JSON.stringify(cart));
+  };
+  const addToCartLocal = (variant: VariantType, quantity: number) => {
+    toast({
+      title: 'Phát triển',
+      description: `Chức năng thêm vào giỏ hàng khi chưa đăng nhập sẽ phát triển sau!`,
+    });
+    // const data = {
+    //   id: variant.id,
+    //   sku: variant.sku,
+    //   price: variant.price,
+    //   quantity,
+    // };
+    // const cartExits = localStorage.getItem('cart');
+    // const cart = cartExits ? JSON.parse(cartExits) : [];
+
+    // const index = cart.findIndex((item: any) => item.id === data.id);
+    // if (cart[index].quantity >= variant.stock || quantity >= variant.stock) {
+    //   toast({
+    //     title: 'Vuợt số lượng',
+    //     description: `Đã thêm ${product.name} vào giỏ hàng!`,
+    //     variant: 'destructive',
+    //   });
+    //   return;
+    // }
+    // if (index !== -1) {
+    //   cart[index].quantity += data.quantity;
+    // } else {
+    //   cart.push(data);
+    // }
+    // localStorage.setItem('cart', JSON.stringify(cart));
   };
 
   const handleAddToWishlist = (variant: VariantType) => {
