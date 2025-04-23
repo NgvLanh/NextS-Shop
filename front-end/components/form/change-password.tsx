@@ -59,7 +59,7 @@ export default function ChangePasswordForm({
         description: error?.message || 'Cập nhật mật khẩu thất bại!',
         variant: 'destructive',
       });
-      console.log(error);
+      console.error(error);
     }
   };
   return (

@@ -7,7 +7,6 @@ import Footer from '../../../components/footer';
 import Header from '../../../components/header';
 import ProductImages from '../../../components/product-images';
 import ProductInfo from '../../../components/product-info';
-import { toast } from '../../../hooks/use-toast';
 import { ProductType, VariantType } from '../../../lib/types';
 import { ApiRequest, ApiResponse } from '../../../services/apiRequest';
 
@@ -38,44 +37,8 @@ export default function ProductDetailPage() {
       setAttributes(result.data?.attributes);
       setVariants(result.data?.variants);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
-  };
-
-  const handleSelectProduct = (key: string, value: string) => {
-    const updated = { ...selectedAttributes, [key]: value };
-    setSelectedAttributes(updated);
-
-    const matched = variants?.find((variant) => {
-      return Object.entries(updated).every(([attrKey, attrValue]) => {
-        return variant.attributes[attrKey] === attrValue;
-      });
-    });
-
-    setVariant(matched ?? ({} as VariantType));
-  };
-
-  const incrementQuantity = () => {
-    if (quantity < variant.stock) {
-      setQuantity(quantity + 1);
-    }
-  };
-
-  const decrementQuantity = () => {
-    if (quantity > 1) {
-      setQuantity(quantity - 1);
-    }
-  };
-
-  const handleAddToCart = (variant: VariantType, quantity: number) => {
-    console.log(variant, quantity);
-  };
-
-  const handleAddToWishlist = (variant: VariantType) => {
-    toast({
-      title: 'Đang phát triển',
-      description: 'Chức đăng phát triển sau ...!',
-    });
   };
 
   return (

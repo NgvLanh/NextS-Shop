@@ -18,7 +18,7 @@ export default function Categories() {
         const result = await ApiRequest<ApiResponse>('categories', 'GET');
         setCategories(result.data || []);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     };
     fetchCategories();

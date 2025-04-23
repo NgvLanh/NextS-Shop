@@ -1,3 +1,13 @@
+export type AddressType = {
+  id: number;
+  fullName: string;
+  phone: string;
+  address: string;
+  city: string;
+  district: string;
+  ward: string;
+};
+
 export type UserType = {
   id: number;
   email: string;
@@ -5,6 +15,7 @@ export type UserType = {
   phone?: string;
   avatarUrl: string;
   role: RoleType;
+  addresses?: AddressType[];
 };
 
 export type RoleType = {
@@ -50,5 +61,13 @@ export type VariantType = {
   sku: string;
   price: number;
   stock: number;
-  attributes: any;
+  attributes?: any;
+  imageUrl?: string;
+  product?: ProductType;
+};
+
+export type CartItemsType = {
+  id: number;
+  quantity: number;
+  variant: VariantType;
 };

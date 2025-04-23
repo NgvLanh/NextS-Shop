@@ -9,6 +9,8 @@ import { UsersModule } from './users/users.module';
 import { BannersModule } from './banners/banners.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
+import { CartsModule } from './carts/carts.module';
+import { AddressesModule } from './addresses/addresses.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { CategoriesModule } from './categories/categories.module';
     BannersModule,
     ProductsModule,
     CategoriesModule,
+    CartsModule,
+    AddressesModule,
   ],
   controllers: [],
 })

@@ -6,6 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { CartItems } from '../../carts/entities/cart-items.entity';
 import { Product } from './product.entity';
 import { VariantAttribute } from './variant_attribute.entity';
 
@@ -35,4 +36,7 @@ export class ProductVariant {
     (variantAttribute) => variantAttribute.variant,
   )
   variantAttributes: VariantAttribute[];
+
+  @OneToMany(() => CartItems, (cartItems) => cartItems.variant)
+  cartItems: CartItems[];
 }

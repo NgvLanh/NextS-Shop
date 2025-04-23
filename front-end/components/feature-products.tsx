@@ -16,7 +16,7 @@ export default function FeaturedProducts() {
         const result = await ApiRequest<ApiResponse>('products', 'GET');
         setProducts(result.data);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     };
     fetchProducts();

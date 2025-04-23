@@ -109,8 +109,6 @@ CREATE TABLE product_images (
 CREATE TABLE carts (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT REFERENCES users(id),
-    session_id VARCHAR(100),
-    expires_at TIMESTAMPTZ
 );
 
 -- CART ITEMS
@@ -119,7 +117,7 @@ CREATE TABLE cart_items (
     cart_id BIGINT REFERENCES carts(id) ON DELETE CASCADE,
     variant_id BIGINT REFERENCES product_variants(id),
     quantity INTEGER NOT NULL CHECK (quantity > 0),
-    UNIQUE(cart_id, variant_id)
+    UNIQUE(cart_id)
 );
 
 -- ORDERS

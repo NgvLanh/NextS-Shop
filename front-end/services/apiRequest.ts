@@ -9,7 +9,7 @@ export type ApiResponse = {
 
 export async function ApiRequest<T>(
   url: string,
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   body?: any
 ): Promise<T> {
   let token = '';

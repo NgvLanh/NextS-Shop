@@ -79,9 +79,9 @@ INSERT INTO variant_attributes (variant_id, option_id) VALUES
 (6, 3), (6, 6);
 
 -- CARTS
-INSERT INTO carts (user_id, session_id, expires_at) VALUES
-(1, 'sess-1a2b3c', NOW() + INTERVAL '7 days'),
-(2, 'sess-2b3c4d', NOW() + INTERVAL '7 days');
+INSERT INTO carts (user_id) VALUES
+(1, ),
+(2, );
 
 -- CART ITEMS
 INSERT INTO cart_items (cart_id, variant_id, quantity) VALUES
