@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
 import { ApiResponse } from '../../configs/api-response';
+import { isVerifyUser } from '../../libs/auth-verifit';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { MailService } from '../mail/mail.service';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
@@ -101,37 +102,13 @@ export class AuthService {
   }
 
   async verifyToken(req) {
-    const userId = req.user?.sub;
-
-    const user = await this.userRepository.findOneBy({ id: userId });
-    if (!user) {
-      throw new HttpException(
-        ApiResponse.notFound('Không tìm thấy người dùng!'),
-        404,
-      );
-    }
-
+    const user = await isVerifyUser(req, this.userRepository);
     const { password, verifyEmail, isActive, ...result } = user;
     return ApiResponse.success('Xác minh token người dùng thành công', result);
   }
 
   async updateProfile(updateUserDto: UpdateUserDto, req) {
-    const userId = req.user?.sub;
-
-    if (!userId) {
-      throw new HttpException(
-        ApiResponse.error('Truy cập không được phép!'),
-        401,
-      );
-    }
-
-    const user = await this.userRepository.findOneBy({ id: userId });
-    if (!user) {
-      throw new HttpException(
-        ApiResponse.notFound('Không tìm thấy người dùng!'),
-        404,
-      );
-    }
+    const user = await isVerifyUser(req, this.userRepository);
 
     Object.assign(user, {
       ...updateUserDto,
@@ -150,22 +127,7 @@ export class AuthService {
   }
 
   async changePassword(changePasswordDto: ChangePasswordDto, req) {
-    const userId = req.user?.sub;
-
-    if (!userId) {
-      throw new HttpException(
-        ApiResponse.error('Truy cập không được phép!'),
-        401,
-      );
-    }
-
-    const user = await this.userRepository.findOneBy({ id: userId });
-    if (!user) {
-      throw new HttpException(
-        ApiResponse.notFound('Không tìm thấy người dùng!'),
-        404,
-      );
-    }
+    const user = await isVerifyUser(req, this.userRepository);
 
     const isCurrentPasswordValid = await bcrypt.compare(
       changePasswordDto.currentPassword,
@@ -201,22 +163,7 @@ export class AuthService {
   }
 
   async updateAvatar(avatarUrl: string, req) {
-    const userId = req.user?.sub;
-
-    if (!userId) {
-      throw new HttpException(
-        ApiResponse.error('Truy cập không được phép!'),
-        401,
-      );
-    }
-
-    const user = await this.userRepository.findOneBy({ id: userId });
-    if (!user) {
-      throw new HttpException(
-        ApiResponse.notFound('Không tìm thấy người dùng!'),
-        404,
-      );
-    }
+    const user = await isVerifyUser(req, this.userRepository);
 
     try {
       user.avatarUrl = avatarUrl

@@ -18,7 +18,7 @@ export default function Header() {
   }, []);
   const verify = async () => {
     const token =
-      localStorage.getItem('token') || sessionStorage.getItem('token');
+      localStorage.getItem('token') || sessionStorage.getItem('token') || false;
     if (token) {
       try {
         const result = await verifyToken();
@@ -34,7 +34,7 @@ export default function Header() {
   };
   const fetchCart = async () => {
     const token =
-      localStorage.getItem('token') || sessionStorage.getItem('token');
+      localStorage.getItem('token') || sessionStorage.getItem('token') || false;
     if (token) {
       const result = await ApiRequest<ApiResponse>('/carts', 'GET');
       if (result.success) {

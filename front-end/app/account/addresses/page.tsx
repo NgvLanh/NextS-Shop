@@ -30,7 +30,9 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { AddressType } from '../../../lib/types';
+import { ApiRequest, ApiResponse } from '../../../services/apiRequest';
 
 export default function AddressesPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -40,35 +42,20 @@ export default function AddressesPage() {
   const [addressToDelete, setAddressToDelete] = useState<number | null>(null);
 
   // Mock addresses data
-  const [addresses, setAddresses] = useState([
-    {
-      id: 1,
-      name: 'John Doe',
-      type: 'Home',
-      street: '123 Main St',
-      apt: 'Apt 4B',
-      city: 'New York',
-      state: 'NY',
-      zip: '10001',
-      country: 'United States',
-      phone: '+1 (555) 123-4567',
-      isDefault: true,
-    },
-    {
-      id: 2,
-      name: 'John Doe',
-      type: 'Work',
-      street: '456 Office Blvd',
-      apt: 'Suite 100',
-      city: 'New York',
-      state: 'NY',
-      zip: '10002',
-      country: 'United States',
-      phone: '+1 (555) 987-6543',
-      isDefault: false,
-    },
-  ]);
+  const [addresses, setAddresses] = useState<AddressType[]>([]);
 
+  useEffect(() => {
+    fetchAddresses();
+  }, []);
+
+  const fetchAddresses = async () => {
+    try {
+      const result = await ApiRequest<ApiResponse>('addresses', 'GET');
+      setAddresses(result.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const handleEditAddress = (id: number) => {
     setAddressToEdit(id);
     setIsEditDialogOpen(true);
@@ -127,17 +114,17 @@ export default function AddressesPage() {
                 </div>
               )}
               <h3 className='font-medium mb-2'>
-                {address.type || address.name}
+                {address.fullName || address.fullName}
               </h3>
               <p className='text-sm text-muted-foreground'>
-                {address.name}
+                {/* {address.fullName}
                 <br />
                 {address.street || address.address}
                 <br />
                 {address.city}, {address.state} {address.zip}
                 <br />
                 {address.country}
-                <br />
+                <br /> */}
                 {address.phone}
               </p>
               <div className='flex gap-2 mt-4'>

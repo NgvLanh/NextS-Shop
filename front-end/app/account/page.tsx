@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 
 import { Tabs, TabsContent } from '@/components/ui/tabs';
+import axios from 'axios';
 import {
   Clock,
   CreditCard,
@@ -20,6 +21,7 @@ import AccountForm from '../../components/form/account';
 import AvatarForm from '../../components/form/avatar';
 import ChangePasswordForm from '../../components/form/change-password';
 import Header from '../../components/header';
+import { useCart } from '../../contexts/CartContext';
 import { useUser } from '../../contexts/UserContext';
 import { toast } from '../../hooks/use-toast';
 import { UserType } from '../../lib/types';
@@ -28,6 +30,7 @@ import { ApiRequest, ApiResponse } from '../../services/apiRequest';
 export default function AccountPage() {
   const router = useRouter();
   const { user, setUser } = useUser();
+  const { setCartItems } = useCart();
 
   const handleupdateProfile = async (data: UserType | null | FieldValues) => {
     try {
@@ -71,9 +74,15 @@ export default function AccountPage() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await axios.post(`api/auth/logout`);
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
+    toast({
+      title: 'Thành công',
+      description: 'Đăng xuất thành công!',
+    });
+    setCartItems([]);
     router.push('/');
   };
 

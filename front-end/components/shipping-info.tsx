@@ -19,6 +19,7 @@ import { useUser } from '../contexts/UserContext';
 import { toast } from '../hooks/use-toast';
 import { DistrictType, ProvinceType, WardType } from '../lib/types';
 import { ApiRequest, ApiResponse } from '../services/apiRequest';
+import { Card, CardContent, CardHeader } from './ui/card';
 import { Textarea } from './ui/textarea';
 
 const schema = z.object({
@@ -38,7 +39,7 @@ type Props = {
 
 export default function ShippingInfo({ nextStep }: Props) {
   const { user } = useUser();
-
+  const [addresses, setAddresses] = useState<any[]>([]);
   const [provinces, setProvinces] = useState<ProvinceType[]>([]);
   const [districts, setDistricts] = useState<DistrictType[]>([]);
   const [wards, setWards] = useState<WardType[]>([]);
@@ -64,20 +65,34 @@ export default function ShippingInfo({ nextStep }: Props) {
   const selectedDistrict = watch('district');
 
   useEffect(() => {
+    fetchAddresses();
     fetchProvinces();
-  }, []);
+    if (user) {
+      setValue('fullName', user?.fullName || '');
+      setValue('phone', user?.phone || '');
+    }
+  }, [user]);
 
   useEffect(() => {
     if (selectedProvince) {
-      handleProvinceChange(Number(selectedProvince));
+      handleProvinceChange(selectedProvince);
     }
   }, [selectedProvince]);
 
   useEffect(() => {
     if (selectedDistrict) {
-      handleDistrictChange(Number(selectedDistrict));
+      handleDistrictChange(selectedDistrict);
     }
   }, [selectedDistrict]);
+
+  const fetchAddresses = async () => {
+    try {
+      const result = await ApiRequest<ApiResponse>('addresses', 'GET');
+      setAddresses(result.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const fetchProvinces = async () => {
     try {
@@ -91,10 +106,10 @@ export default function ShippingInfo({ nextStep }: Props) {
     }
   };
 
-  const handleProvinceChange = async (provinceId: number) => {
+  const handleProvinceChange = async (selectedProvince: any) => {
     try {
       const result = await ApiRequest<ApiResponse>(
-        `addresses/districts/${provinceId}`,
+        `addresses/districts/${JSON.parse(selectedProvince)?.value}`,
         'GET'
       );
       setDistricts(result.data);
@@ -106,10 +121,10 @@ export default function ShippingInfo({ nextStep }: Props) {
     }
   };
 
-  const handleDistrictChange = async (districtId: number) => {
+  const handleDistrictChange = async (selectedDistrict: any) => {
     try {
       const result = await ApiRequest<ApiResponse>(
-        `addresses/wards/${districtId}`,
+        `addresses/wards/${JSON.parse(selectedDistrict)?.value}`,
         'GET'
       );
       setWards(result.data);
@@ -140,6 +155,7 @@ export default function ShippingInfo({ nextStep }: Props) {
           title: 'Thành công',
           description: 'Thêm điểm giao hàng thành công!',
         });
+        fetchAddresses();
         nextStep();
       }
     } catch (error: any) {
@@ -162,18 +178,55 @@ export default function ShippingInfo({ nextStep }: Props) {
           <TabsTrigger value='new'>Địa chỉ mới</TabsTrigger>
         </TabsList>
         <TabsContent value='existing' className='space-y-6 pt-4'>
-          <div className='space-y-4'>
+          <div className='max-h-[420px] overflow-y-auto space-y-4 pr-2'>
             {user?.addresses?.map((address, index) => (
-              <div key={index} className='border p-4 rounded-lg'>
-                <p>{address.fullName}</p>
-                <p>
-                  {address.ward}, {address.district}, {address.city}
-                </p>
-                <p>{address.phone}</p>
-                <Button onClick={nextStep} className='w-full mt-2'>
-                  Chọn địa chỉ này
-                </Button>
-              </div>
+              <Card key={index}>
+                <CardHeader className='flex pb-2 text-base font-semibold'>
+                  {address.fullName}
+                  <span className='text-sm font-normal text-muted-foreground'>
+                    {address.phone}
+                  </span>
+                </CardHeader>
+                <CardContent className='space-y-3 text-sm'>
+                  <div className='flex flex-wrap gap-x-4 gap-y-1'>
+                    <div className='flex items-center space-x-1'>
+                      <span className='font-medium text-muted-foreground'>
+                        Tỉnh:
+                      </span>
+                      <span>
+                        {JSON.parse(address?.address?.province)?.label}
+                      </span>
+                    </div>
+                    <div className='flex items-center space-x-1'>
+                      <span className='font-medium text-muted-foreground'>
+                        Huyện:
+                      </span>
+                      <span>
+                        {JSON.parse(address?.address?.district)?.label}
+                      </span>
+                    </div>
+                    <div className='flex items-center space-x-1'>
+                      <span className='font-medium text-muted-foreground'>
+                        Xã:
+                      </span>
+                      <span>{JSON.parse(address?.address?.ward)?.label}</span>
+                    </div>
+                  </div>
+
+                  <p>
+                    <span className='font-medium text-muted-foreground'>
+                      Chi tiết:
+                    </span>{' '}
+                    {address?.address?.details}
+                  </p>
+
+                  <div className='flex'>
+                    <Button onClick={nextStep} className='flex-1'>
+                      Chọn địa chỉ này
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </TabsContent>
@@ -219,14 +272,21 @@ export default function ShippingInfo({ nextStep }: Props) {
             <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
               <div className='space-y-2'>
                 <Label htmlFor='province'>Tỉnh/Thành</Label>
-                <Select onValueChange={(value) => setValue('province', value)}>
+                <Select
+                  onValueChange={(value) => {
+                    setValue('province', value);
+                  }}
+                >
                   <SelectTrigger id='province'>
                     <SelectValue placeholder='Chọn tỉnh/thành' />
                   </SelectTrigger>
                   <SelectContent>
                     {provinces.map((province) => (
                       <SelectItem
-                        value={province.ProvinceID.toString()}
+                        value={JSON.stringify({
+                          value: province.ProvinceID.toString(),
+                          label: province.ProvinceName,
+                        })}
                         key={province.ProvinceID}
                       >
                         {province.ProvinceName}
@@ -243,14 +303,21 @@ export default function ShippingInfo({ nextStep }: Props) {
 
               <div className='space-y-2'>
                 <Label htmlFor='district'>Quận/Huyện</Label>
-                <Select onValueChange={(value) => setValue('district', value)}>
+                <Select
+                  onValueChange={(value) => {
+                    setValue('district', value);
+                  }}
+                >
                   <SelectTrigger id='district'>
                     <SelectValue placeholder='Chọn quận/huyện' />
                   </SelectTrigger>
                   <SelectContent>
                     {districts.map((district) => (
                       <SelectItem
-                        value={district.DistrictID.toString()}
+                        value={JSON.stringify({
+                          value: district.DistrictID.toString(),
+                          label: district.DistrictName,
+                        })}
                         key={district.DistrictID}
                       >
                         {district.DistrictName}
@@ -267,13 +334,23 @@ export default function ShippingInfo({ nextStep }: Props) {
 
               <div className='space-y-2'>
                 <Label htmlFor='ward'>Phường/Xã</Label>
-                <Select onValueChange={(value) => setValue('ward', value)}>
+                <Select
+                  onValueChange={(value) => {
+                    setValue('ward', value);
+                  }}
+                >
                   <SelectTrigger id='ward'>
                     <SelectValue placeholder='Chọn phường/xã' />
                   </SelectTrigger>
                   <SelectContent>
                     {wards.map((ward) => (
-                      <SelectItem value={ward.WardCode} key={ward.WardCode}>
+                      <SelectItem
+                        value={JSON.stringify({
+                          value: ward.WardCode,
+                          label: ward.WardName,
+                        })}
+                        key={ward.WardCode}
+                      >
                         {ward.WardName}
                       </SelectItem>
                     ))}

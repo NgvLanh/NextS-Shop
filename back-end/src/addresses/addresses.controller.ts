@@ -15,15 +15,6 @@ import { CreateAddressDto } from './dto/create-address.dto';
 export class AddressesController {
   constructor(private readonly addressesService: AddressesService) {}
 
-  @UseGuards(AuthGuard)
-  @Post()
-  async create(
-    @Body() createAddressDto: CreateAddressDto,
-    @Req() req: Request,
-  ) {
-    return await this.addressesService.create(createAddressDto, req);
-  }
-
   @Get('provinces')
   getProvinces() {
     return this.addressesService.getProvinces();
@@ -37,5 +28,20 @@ export class AddressesController {
   @Get('wards/:districtId')
   getWards(@Param('districtId') districtId: number) {
     return this.addressesService.getWards(districtId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post()
+  async create(
+    @Body() createAddressDto: CreateAddressDto,
+    @Req() req: Request,
+  ) {
+    return await this.addressesService.create(createAddressDto, req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get()
+  async getAll(@Req() req: Request) {
+    return await this.addressesService.findAll(req);
   }
 }
