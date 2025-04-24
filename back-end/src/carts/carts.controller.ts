@@ -1,5 +1,15 @@
-import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { Request } from 'express';
+import { AuthGuard } from '../auth/auth.guard';
 import { CartsService } from './carts.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
@@ -13,6 +23,7 @@ export class CartsController {
     return await this.cartsService.create(createCartDto, req);
   }
 
+  @UseGuards(AuthGuard)
   @Get()
   async findOne(@Req() req: Request) {
     return await this.cartsService.findOne(req);

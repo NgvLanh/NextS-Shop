@@ -1,9 +1,13 @@
-import { Menu, X } from 'lucide-react';
+import { Menu, ShoppingCart, X } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useState } from 'react';
-
-export default function MobileHeader(auth: { auth: boolean }) {
+import { Badge } from './ui/badge';
+type HeaderProps = {
+  auth: boolean;
+  cartItemCount: number;
+};
+export default function MobileHeader({ auth, cartItemCount }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -11,12 +15,24 @@ export default function MobileHeader(auth: { auth: boolean }) {
       <Link href='/' className='font-bold text-xl'>
         NextS
       </Link>
-      <button
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className='p-2 hover:bg-gray-200 rounded-full transition duration-300'
-      >
-        {isMenuOpen ? <X className='h-6 w-6' /> : <Menu className='h-6 w-6' />}
-      </button>
+      <div className='flex items-center space-x-1'>
+        <Link href='/cart' className='relative mr-2'>
+          <ShoppingCart className='h-5 w-5' />
+          <Badge className='absolute -top-2 -right-4 scale-75'>
+            {cartItemCount}
+          </Badge>
+        </Link>
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className='p-2 hover:bg-gray-200 rounded-full transition duration-300'
+        >
+          {isMenuOpen ? (
+            <X className='h-6 w-6' />
+          ) : (
+            <Menu className='h-6 w-6' />
+          )}
+        </button>
+      </div>
       {isMenuOpen && (
         <>
           <motion.div
@@ -75,10 +91,10 @@ export default function MobileHeader(auth: { auth: boolean }) {
                 <span className='absolute left-0 bottom-[-2px] w-0 h-[2px] bg-primary opacity-70 transition-all duration-300 group-hover:w-full'></span>
               </Link>
               <Link
-                href={auth.auth ? '/account' : '/login'}
+                href={auth ? '/account' : '/login'}
                 className='py-2 text-sm font-medium relative group'
               >
-                {auth.auth ? 'Tài khoản' : 'Đăng nhập'}
+                {auth ? 'Tài khoản' : 'Đăng nhập'}
                 <span className='absolute left-0 bottom-[-2px] w-0 h-[2px] bg-primary opacity-70 transition-all duration-300 group-hover:w-full'></span>
               </Link>
             </div>

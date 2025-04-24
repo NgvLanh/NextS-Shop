@@ -71,3 +71,18 @@ export type CartItemsType = {
   quantity: number;
   variant: VariantType;
 };
+
+export type ProvinceType = {
+  ProvinceID: number;
+  ProvinceName: string;
+};
+
+export type DistrictType = {
+  DistrictID: number;
+  DistrictName: string;
+};
+
+export type WardType = {
+  WardCode: string;
+  WardName: string;
+};

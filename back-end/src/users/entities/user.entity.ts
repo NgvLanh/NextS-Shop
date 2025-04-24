@@ -4,10 +4,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Address } from '../../addresses/entities/address.entity';
 import { Cart } from '../../carts/entities/cart.entity';
 import { Role } from '../../roles/entities/role.entity';
 
@@ -49,4 +51,7 @@ export class User {
 
   @OneToOne(() => Cart, (cart) => cart.user)
   cart: Cart;
+
+  @OneToMany(() => Address, (address) => address.user)
+  addresses: Address[];
 }
