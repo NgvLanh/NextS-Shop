@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { firstValueFrom } from 'rxjs';
 import { Repository } from 'typeorm';
 import { ApiResponse } from '../../configs/api-response';
+import { isVerifyUser } from '../../libs/auth-verifit';
 import { User } from '../users/entities/user.entity';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { Address } from './entities/address.entity';
@@ -101,26 +102,8 @@ export class AddressesService {
   }
 
   async create(createAddressDto: CreateAddressDto, req) {
-    const userId = req.user?.sub;
+    const user = await isVerifyUser(req, this.userRepository);
 
-    if (!userId) {
-      throw new HttpException(
-        ApiResponse.error('Truy cập không được phép!'),
-        401,
-      );
-    }
-
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: { addresses: true },
-    });
-
-    if (!user) {
-      throw new HttpException(
-        ApiResponse.notFound('Không tìm thấy người dùng!'),
-        404,
-      );
-    }
     const { fullName, phone, address } = createAddressDto;
 
     const existed = user.addresses?.find(
@@ -154,5 +137,19 @@ export class AddressesService {
         500,
       );
     }
+  }
+
+  async findAll(req) {
+    const user = await isVerifyUser(req, this.userRepository);
+
+    const result$ = await this.addressRepository.find({
+      where: { user: { id: user.id } },
+      order: { id: 'ASC' },
+    });
+
+    return ApiResponse.success(
+      'Lấy danh sách điểm giao hàng của người dùng!',
+      result$,
+    );
   }
 }

@@ -2,10 +2,8 @@ export type AddressType = {
   id: number;
   fullName: string;
   phone: string;
-  address: string;
-  city: string;
-  district: string;
-  ward: string;
+  address: any;
+  isDefault: boolean;
 };
 
 export type UserType = {

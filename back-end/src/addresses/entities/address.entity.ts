@@ -25,6 +25,9 @@ export class Address {
   @IsNotEmpty({ message: 'Địa chỉ không được để trống' })
   address: any;
 
+  @Column({ name: 'is_default', default: false })
+  isDefault: boolean;
+
   @ManyToOne(() => User, (user) => user.addresses)
   @JoinColumn({ name: 'user_id' })
   user: User;

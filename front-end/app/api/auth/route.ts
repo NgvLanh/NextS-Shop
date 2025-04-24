@@ -23,18 +23,3 @@ export async function POST(request: Request) {
     });
   }
 }
-
-export async function GET() {
-  const cookie = await cookies();
-  cookie.set('token', '', {
-    httpOnly: true,
-    secure: true,
-    path: '/',
-    maxAge: 0,
-  });
-
-  return NextResponse.json({
-    success: true,
-    message: 'Đã xoá token khỏi cookie (logout)',
-  });
-}

@@ -2,6 +2,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApiResponse } from '../../configs/api-response';
+import { isVerifyUser } from '../../libs/auth-verifit';
 import { ProductVariant } from '../products/entities/product-variant.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateCartDto } from './dto/create-cart.dto';
@@ -23,17 +24,9 @@ export class CartsService {
   ) {}
 
   async create(createCartDto: CreateCartDto, req) {
-    const userId = req.user?.sub;
-    const user = await this.userRepository.findOneBy({ id: userId });
-    if (!user) {
-      throw new HttpException(
-        ApiResponse.notFound('Không tìm thấy người dùng!'),
-        404,
-      );
-    }
-
+    const user = await isVerifyUser(req, this.userRepository);
     const cart = await this.cartRepository.findOne({
-      where: { user: { id: userId } },
+      where: { user: { id: user.id } },
     });
 
     const variant = await this.varianttRepository.findOneBy({
@@ -72,17 +65,10 @@ export class CartsService {
   }
 
   async findOne(req) {
-    const userId = req.user?.sub;
-    const user = await this.userRepository.findOneBy({ id: userId });
-    if (!user) {
-      throw new HttpException(
-        ApiResponse.notFound('Không tìm thấy người dùng!'),
-        404,
-      );
-    }
+    const user = await isVerifyUser(req, this.userRepository);
     const cart = await this.cartRepository.findOne({
       relations: { cartItems: { variant: { product: true } } },
-      where: { user: { id: userId } },
+      where: { user: { id: user.id } },
     });
     return ApiResponse.success('Lấy thông tin giỏ hàng thành công!', cart);
   }
