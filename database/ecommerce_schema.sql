@@ -30,7 +30,7 @@ CREATE TABLE users (
 CREATE TABLE addresses (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    recipient VARCHAR(100) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     address JSONB NOT NULL,
     is_default BOOLEAN DEFAULT false,

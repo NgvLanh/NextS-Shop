@@ -10,12 +10,16 @@ export default function HeroSection() {
   const [banner, setBanner] = useState<BannerType | null>(null);
 
   useEffect(() => {
-    const fetchBanner = async () => {
-      const result = await ApiRequest<ApiResponse>('banners', 'GET');
-      setBanner(result.data);
-    };
     fetchBanner();
   }, []);
+  const fetchBanner = async () => {
+    try {
+      const result = await ApiRequest<ApiResponse>('banners', 'GET');
+      setBanner(result.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <section className='w-full py-12 md:py-24 lg:py-32 bg-muted'>

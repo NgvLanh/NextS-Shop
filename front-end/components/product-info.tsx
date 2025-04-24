@@ -240,7 +240,6 @@ export default function ProductInfo({
 
       <div className='flex flex-col sm:flex-row gap-4 cursor-pointer'>
         <Button
-          className={`flex-1 select-none`}
           size='lg'
           disabled={!isAccept}
           onClick={() => handleAddToCart(variant, quantity)}

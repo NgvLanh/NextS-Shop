@@ -1,11 +1,22 @@
 import { HttpService } from '@nestjs/axios';
 import { HttpException, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { firstValueFrom } from 'rxjs';
+import { Repository } from 'typeorm';
 import { ApiResponse } from '../../configs/api-response';
+import { User } from '../users/entities/user.entity';
+import { CreateAddressDto } from './dto/create-address.dto';
+import { Address } from './entities/address.entity';
 
 @Injectable()
 export class AddressesService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(Address)
+    private readonly addressRepository: Repository<Address>,
+  ) {}
 
   private readonly baseUrl =
     'https://dev-online-gateway.ghn.vn/shiip/public-api';
@@ -20,10 +31,13 @@ export class AddressesService {
     );
     try {
       const response = await firstValueFrom(response$);
-      const result = response.data.data?.map((province: any) => ({
+      const result$ = response.data.data?.map((province: any) => ({
         ProvinceID: province.ProvinceID,
         ProvinceName: province.ProvinceName,
       }));
+      const result = result$.filter(
+        (province) => !province.ProvinceName.toLowerCase().includes(`test`),
+      );
       return ApiResponse.success('Lấy danh sách tỉnh thành công!', result);
     } catch (error) {
       throw new HttpException(
@@ -82,6 +96,62 @@ export class AddressesService {
       throw new HttpException(
         ApiResponse.notFound('Không tìm thấy dữ liệu!'),
         404,
+      );
+    }
+  }
+
+  async create(createAddressDto: CreateAddressDto, req) {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(
+        ApiResponse.error('Truy cập không được phép!'),
+        401,
+      );
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: { addresses: true },
+    });
+
+    if (!user) {
+      throw new HttpException(
+        ApiResponse.notFound('Không tìm thấy người dùng!'),
+        404,
+      );
+    }
+    const { fullName, phone, address } = createAddressDto;
+
+    const existed = user.addresses?.find(
+      (addr) =>
+        addr.address?.details === address.details &&
+        addr.address?.ward === address.ward &&
+        addr.address?.district === address.district &&
+        addr.address?.province === address.province,
+    );
+
+    if (existed) {
+      throw new HttpException(ApiResponse.error('Địa chỉ đã tồn tại!'), 400);
+    }
+    const isFirst = user.addresses?.length === 0;
+
+    try {
+      const data = {
+        fullName: fullName,
+        phone: phone,
+        address: address,
+        user: user,
+        isDefault: isFirst,
+      };
+      const newAddress = this.addressRepository.create(data);
+      const result$ = await this.addressRepository.save(newAddress);
+      const { user: _, ...result } = result$;
+      return ApiResponse.success('Tạo điểm giao hàng thành công!', result);
+    } catch (error) {
+      throw new HttpException(
+        ApiResponse.error('Đã xảy ra lỗi khi tạo điểm giao hàng!' + error),
+        500,
       );
     }
   }

@@ -1,9 +1,28 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from '../auth/auth.guard';
 import { AddressesService } from './addresses.service';
+import { CreateAddressDto } from './dto/create-address.dto';
 
 @Controller('api/addresses')
 export class AddressesController {
   constructor(private readonly addressesService: AddressesService) {}
+
+  @UseGuards(AuthGuard)
+  @Post()
+  async create(
+    @Body() createAddressDto: CreateAddressDto,
+    @Req() req: Request,
+  ) {
+    return await this.addressesService.create(createAddressDto, req);
+  }
 
   @Get('provinces')
   getProvinces() {

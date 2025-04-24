@@ -1,34 +1,14 @@
 'use client';
 
-import { useCart } from '@/contexts/CartContext';
 import { Heart, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect } from 'react';
-import { ApiRequest, ApiResponse } from '../services/apiRequest';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-
-export default function DesktopHeader(auth: { auth: boolean }) {
-  const { cartItems, setCartItems } = useCart();
-
-  useEffect(() => {
-    fetchCart();
-  }, []);
-
-  const fetchCart = async () => {
-    try {
-      const result = await ApiRequest<ApiResponse>('carts', 'GET');
-      setCartItems(result.data.cartItems);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const cartItemCount = cartItems.reduce(
-    (total, item) => total + item.quantity,
-    0
-  );
-
+type HeaderProps = {
+  auth: boolean;
+  cartItemCount: number;
+};
+export default function DesktopHeader({ auth, cartItemCount }: HeaderProps) {
   return (
     <div className='hidden md:flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
@@ -68,9 +48,9 @@ export default function DesktopHeader(auth: { auth: boolean }) {
             {cartItemCount}
           </Badge>
         </Link>
-        <Link href={auth.auth ? '/account' : '/login'}>
+        <Link href={auth ? '/account' : '/login'}>
           <Button variant='outline' size='sm'>
-            {auth.auth ? 'Tài khoản' : 'Đăng nhập'}
+            {auth ? 'Tài khoản' : 'Đăng nhập'}
           </Button>
         </Link>
       </div>

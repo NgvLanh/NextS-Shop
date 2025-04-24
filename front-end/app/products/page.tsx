@@ -82,10 +82,10 @@ export default function ProductsPage() {
 
     switch (sort) {
       case 'price-low':
-        filtered = [...filtered].sort((a, b) => a.price - b.price);
+        filtered = [...filtered].sort((a, b) => a.basePrice - b.basePrice);
         break;
       case 'price-high':
-        filtered = [...filtered].sort((a, b) => b.price - a.price);
+        filtered = [...filtered].sort((a, b) => b.basePrice - a.basePrice);
         break;
       case 'newest':
         filtered = [...filtered].sort(
