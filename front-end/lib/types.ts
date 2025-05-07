@@ -67,6 +67,7 @@ export type VariantType = {
 export type CartItemsType = {
   id: number;
   quantity: number;
+  isSelected: boolean;
   variant: VariantType;
 };
 

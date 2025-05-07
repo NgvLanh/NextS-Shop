@@ -3,15 +3,19 @@
 import { ArrowRight, Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { formatCurrencyVND } from '../lib/utils';
 import { ApiRequest, ApiResponse } from '../services/apiRequest';
 import { Button } from './ui/button';
+import { Checkbox } from './ui/checkbox';
 import { Input } from './ui/input';
 
 export default function ItemsCart() {
   const { cartItems, setCartItems } = useCart();
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     fetchCart();
@@ -47,7 +51,25 @@ export default function ItemsCart() {
     });
     if (result.success) {
       setCartItems(cartItems.filter((item) => item.id !== id));
+      setSelectedItems((prev) => prev.filter((itemId) => itemId !== id));
     }
+  };
+
+  const isAllSelected =
+    cartItems.length > 0 && selectedItems.length === cartItems.length;
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(cartItems.map((item) => item.id));
+    }
+  };
+
+  const toggleSelectItem = (id: number) => {
+    setSelectedItems((prev) =>
+      prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
+    );
   };
 
   const subtotal = cartItems.reduce(
@@ -57,12 +79,20 @@ export default function ItemsCart() {
   const shipping = 10;
   const tax = subtotal * 0.1;
   const total = subtotal + shipping + tax;
+
   return (
     <div className='grid md:grid-cols-3 gap-8'>
       <div className='md:col-span-2'>
         <div className='border rounded-lg overflow-hidden'>
           <div className='hidden sm:grid grid-cols-12 gap-4 p-4 bg-muted text-sm font-medium'>
-            <div className='col-span-6'>Sản phẩm</div>
+            <div className='col-span-1'>
+              <Checkbox
+                id='select-all'
+                checked={isAllSelected}
+                onCheckedChange={toggleSelectAll}
+              />
+            </div>
+            <div className='col-span-5'>Sản phẩm</div>
             <div className='col-span-2 text-center'>Giá tiền</div>
             <div className='col-span-2 text-center'>Số lượng</div>
             <div className='col-span-2 text-right'>Tổng tiền</div>
@@ -73,7 +103,15 @@ export default function ItemsCart() {
               key={item.id}
               className='grid grid-cols-1 sm:grid-cols-12 gap-4 p-4 border-t first:border-t-0 items-center'
             >
-              <div className='col-span-6 flex items-start gap-4'>
+              <div className='col-span-1 hidden sm:block'>
+                <Checkbox
+                  id={`checkbox-${item.id}`}
+                  checked={selectedItems.includes(item.id)}
+                  onCheckedChange={() => toggleSelectItem(item.id)}
+                />
+              </div>
+
+              <div className='col-span-12 sm:col-span-5 flex items-start gap-4'>
                 <div className='w-20 h-20 rounded-md overflow-hidden'>
                   <Image
                     src={item.variant?.imageUrl || '/placeholder.svg'}
@@ -99,11 +137,11 @@ export default function ItemsCart() {
                 </div>
               </div>
 
-              <div className='col-span-2 text-center hidden sm:block'>
+              <div className='col-span-12 sm:col-span-2 text-center hidden sm:block'>
                 {formatCurrencyVND(item.variant?.price)}
               </div>
 
-              <div className='col-span-2 flex justify-center'>
+              <div className='col-span-12 sm:col-span-2 flex justify-center'>
                 <div className='flex items-center'>
                   <Button
                     variant='outline'
@@ -125,7 +163,7 @@ export default function ItemsCart() {
                 </div>
               </div>
 
-              <div className='col-span-2 text-right font-medium'>
+              <div className='col-span-12 sm:col-span-2 text-right font-medium'>
                 <span className='sm:hidden font-medium mr-2'>Tổng:</span>
                 {formatCurrencyVND(item.variant?.price * item.quantity)}
               </div>
@@ -165,11 +203,21 @@ export default function ItemsCart() {
             </div>
           </div>
 
-          <Button className='w-full' size='lg' asChild>
-            <Link href='/checkout'>
-              Tiếp tục thanh toán
-              <ArrowRight className='ml-2 h-4 w-4' />
-            </Link>
+          <Button
+            className={`w-full `}
+            size='lg'
+            disabled={selectedItems.length === 0}
+            onClick={() => {
+              if (selectedItems.length > 0) {
+                //
+                router.push('/checkout');
+              } else {
+                alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán!');
+              }
+            }}
+          >
+            Tiếp tục thanh toán
+            <ArrowRight className='ml-2 h-4 w-4' />
           </Button>
 
           <div className='text-xs text-muted-foreground text-center'>

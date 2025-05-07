@@ -16,6 +16,9 @@ export class CartItems {
   @Column({ default: 1 })
   quantity: number;
 
+  @Column({ name: 'is_selected' })
+  isSelected: boolean;
+
   @ManyToOne(() => Cart, (cart) => cart.cartItems)
   @JoinColumn({ name: 'cart_id' })
   cart: Cart;

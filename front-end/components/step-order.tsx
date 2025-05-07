@@ -35,21 +35,6 @@ export default function StepOrder({ step }: Props) {
           Thanh toán
         </span>
       </div>
-      <div className='h-px w-12 bg-muted'></div>
-      <div className='flex items-center gap-2'>
-        <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            step >= 3
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-muted-foreground'
-          }`}
-        >
-          {step > 3 ? <Check className='h-4 w-4' /> : 3}
-        </div>
-        <span className={step >= 3 ? 'font-medium' : 'text-muted-foreground'}>
-          Xem lại
-        </span>
-      </div>
     </div>
   );
 }
