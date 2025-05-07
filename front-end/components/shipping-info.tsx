@@ -35,9 +35,15 @@ type FormData = z.infer<typeof schema>;
 
 type Props = {
   nextStep: () => void;
+  shippingData?: any;
+  setShippingData?: (data: any) => void;
 };
 
-export default function ShippingInfo({ nextStep }: Props) {
+export default function ShippingInfo({
+  nextStep,
+  shippingData,
+  setShippingData,
+}: Props) {
   const { user } = useUser();
   const [addresses, setAddresses] = useState<any[]>([]);
   const [provinces, setProvinces] = useState<ProvinceType[]>([]);
@@ -70,6 +76,15 @@ export default function ShippingInfo({ nextStep }: Props) {
     if (user) {
       setValue('fullName', user?.fullName || '');
       setValue('phone', user?.phone || '');
+      setShippingData &&
+        setShippingData({
+          fullName: user?.fullName || '',
+          phone: user?.phone || '',
+          address: '',
+          province: '',
+          district: '',
+          ward: '',
+        });
     }
   }, [user]);
 
@@ -156,6 +171,7 @@ export default function ShippingInfo({ nextStep }: Props) {
           description: 'Thêm điểm giao hàng thành công!',
         });
         fetchAddresses();
+        setShippingData && setShippingData(result.data);
         nextStep();
       }
     } catch (error: any) {
@@ -166,6 +182,13 @@ export default function ShippingInfo({ nextStep }: Props) {
         variant: 'destructive',
       });
     }
+  };
+
+  const selectedAddress = (address: any) => {
+    setShippingData && setShippingData(address);
+    console.log(address);
+
+    nextStep();
   };
 
   return (
@@ -221,7 +244,10 @@ export default function ShippingInfo({ nextStep }: Props) {
                   </p>
 
                   <div className='flex'>
-                    <Button onClick={nextStep} className='flex-1'>
+                    <Button
+                      onClick={() => selectedAddress(address)}
+                      className='flex-1'
+                    >
                       Chọn địa chỉ này
                     </Button>
                   </div>

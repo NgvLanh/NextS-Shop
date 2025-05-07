@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Footer from '../../components/footer';
 import Header from '../../components/header';
 import PaymentInfo from '../../components/payment-info';
-import ReviewInfo from '../../components/review-info';
 import ReviewOrder from '../../components/review-order';
 import ShippingInfo from '../../components/shipping-info';
 import StepOrder from '../../components/step-order';
@@ -13,6 +12,7 @@ import { useCart } from '../../contexts/CartContext';
 export default function CheckoutPage() {
   const [step, setStep] = useState(1);
   const { cartItems } = useCart();
+  const [shippingData, setShippingData] = useState({});
 
   const nextStep = () => {
     setStep(step + 1);
@@ -31,12 +31,15 @@ export default function CheckoutPage() {
           <StepOrder step={step} />
           <div className='grid md:grid-cols-3 gap-8'>
             <div className='md:col-span-2'>
-              {step === 1 && <ShippingInfo nextStep={nextStep} />}
+              {step === 1 && (
+                <ShippingInfo
+                  nextStep={nextStep}
+                  shippingData={shippingData}
+                  setShippingData={setShippingData}
+                />
+              )}
               {step === 2 && (
                 <PaymentInfo prevStep={prevStep} nextStep={nextStep} />
-              )}
-              {step === 3 && (
-                <ReviewInfo cartItems={cartItems} prevStep={prevStep} />
               )}
             </div>
 

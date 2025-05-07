@@ -18,6 +18,7 @@ import { UpdateCartDto } from './dto/update-cart.dto';
 export class CartsController {
   constructor(private readonly cartsService: CartsService) {}
 
+  @UseGuards(AuthGuard)
   @Post()
   async create(@Body() createCartDto: CreateCartDto, @Req() req: Request) {
     return await this.cartsService.create(createCartDto, req);
